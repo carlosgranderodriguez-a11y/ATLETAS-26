@@ -169,19 +169,39 @@ tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)
 .gcp iframe{width:100%;height:520px;border:1px solid var(--bd);border-radius:8px;margin-top:12px;background:#fff}
 .prof-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:10px}
 @media(max-width:640px){.prof-grid{grid-template-columns:1fr}.wsl{width:100%}}
+body.athlete .coach-only{display:none!important}
+#pin-gate{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+.pin-card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:30px 26px;width:100%;max-width:360px;text-align:center}
+.pin-card .pin-av{width:56px;height:56px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:20px;background:rgba(80,200,240,.14);color:var(--bl)}
+.pin-card h2{font-family:var(--fh);font-weight:800;font-size:22px;margin-bottom:4px}
+.pin-card p{font-size:12px;color:var(--mu);margin-bottom:18px}
+.pin-card input{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-family:var(--fm);font-size:20px;letter-spacing:.3em;text-align:center;padding:12px;margin-bottom:12px}
+.pin-card input:focus{outline:none;border-color:var(--bl)}
+.pin-card button{width:100%;background:rgba(80,200,240,.12);border:1px solid rgba(80,200,240,.5);color:var(--bl);font-family:var(--fm);font-size:13px;padding:11px;border-radius:9px;cursor:pointer}
+.pin-card .pin-err{color:var(--dg);font-size:12px;font-family:var(--fm);min-height:16px;margin-top:8px}
 </style>
 </head>
 <body>
+<div id="pin-gate" style="display:none">
+  <div class="pin-card">
+    <div class="pin-av" id="pin-av">·</div>
+    <h2 id="pin-name">Acceso</h2>
+    <p id="pin-msg">Introduce tu PIN para ver tu documento</p>
+    <input id="pin-input" type="password" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')checkPin()">
+    <button onclick="checkPin()">Entrar</button>
+    <div class="pin-err" id="pin-err"></div>
+  </div>
+</div>
 <nav>
   <div class="nbrand" id="nb-name">ATLETA</div>
   <div class="ntabs">
-    <a href="index.html" style="padding:0 14px;font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--mu);border-bottom:2px solid transparent;white-space:nowrap;font-family:var(--fm);display:flex;align-items:center;height:52px;text-decoration:none;border-right:1px solid var(--bd)" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--mu)'">← Atletas</a>
+    <a href="index.html" class="coach-only" style="padding:0 14px;font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--mu);border-bottom:2px solid transparent;white-space:nowrap;font-family:var(--fm);display:flex;align-items:center;height:52px;text-decoration:none;border-right:1px solid var(--bd)" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--mu)'">← Atletas</a>
     <div class="ntab on" onclick="T('res')">Resumen</div>
     <div class="ntab" onclick="T('cal')">Calendario</div>
-    <div class="ntab" onclick="T('tmp')">Temporada</div>
+    <div class="ntab coach-only" onclick="T('tmp')">Temporada</div>
     <div class="ntab" onclick="T('wel')">Wellness</div>
     <div class="ntab" onclick="T('ent')" style="color:var(--bl)">⊕ Entrenamiento</div>
-    <div class="ntab adm" onclick="T('adm')">⚙ Gestión</div>
+    <div class="ntab adm coach-only" onclick="T('adm')">⚙ Gestión</div>
   </div>
 </nav>
 <main>
@@ -229,7 +249,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)
       <div style="font-family:var(--fm);font-size:10px;color:var(--mu);margin-top:3px" id="wk-sub">—</div></div>
       <button onclick="closeDay()" style="font-family:var(--fm);font-size:11px;padding:4px 10px;border-radius:4px;background:var(--bg3);border:1px solid var(--bd);color:var(--mu);cursor:pointer">✕</button>
     </div>
-    <div class="fg" style="margin-bottom:10px"><label>FASE — MOMENTO DE TEMPORADA</label>
+    <div class="fg coach-only" style="margin-bottom:10px"><label>FASE — MOMENTO DE TEMPORADA</label>
       <select id="wk-fase">
         <option value="">— sin fase —</option>
         <option value="A">A — Acumulación</option><option value="A+">A+ — Acum. avanzada</option>
@@ -241,9 +261,9 @@ tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)
     <div class="fg" style="margin-bottom:10px">
       <div class="fg"><label style="color:#50c8f0">🏋️ CARGA (RPE)</label><input id="wk-rpe" type="number" step="0.1" min="1" max="10" placeholder="ej. 3.5"></div>
     </div>
-    <div class="fg" style="margin-bottom:14px"><label>NOTA DEL DÍA</label><input id="wk-nota" placeholder="Objetivos, competición, observaciones..."></div>
+    <div class="fg" style="margin-bottom:14px"><label>COMENTARIO DEL DÍA</label><input id="wk-nota" placeholder="Sensaciones, observaciones, incidencias..."></div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button onclick="clearDay()" style="font-family:var(--fm);font-size:11px;padding:6px 12px;border-radius:4px;background:rgba(240,80,80,.06);border:1px solid rgba(240,80,80,.25);color:var(--dg);cursor:pointer">Limpiar</button>
+      <button class="coach-only" onclick="clearDay()" style="font-family:var(--fm);font-size:11px;padding:6px 12px;border-radius:4px;background:rgba(240,80,80,.06);border:1px solid rgba(240,80,80,.25);color:var(--dg);cursor:pointer">Limpiar</button>
       <button onclick="saveDay()" style="font-family:var(--fm);font-size:11px;padding:6px 14px;border-radius:4px;background:rgba(200,240,80,.1);border:1px solid rgba(200,240,80,.4);color:var(--ac);cursor:pointer">Guardar día</button>
     </div>
   </div>
@@ -302,8 +322,8 @@ tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)
     <div class="gcp-t">⊕ GymCoach Pro</div>
     <div class="gcp-d" id="gc-desc">Conecta la sesión de fuerza del atleta. Pega el enlace de su panel/PWA en GymCoach Pro y ábrelo o incrústalo aquí.</div>
     <div class="gcp-row">
-      <input id="gc-url" placeholder="https://...gymcoach del atleta" style="flex:1;min-width:220px;background:var(--bg2);border:1px solid var(--bd);border-radius:5px;padding:7px 10px;color:var(--tx);font-family:var(--fb);font-size:13px">
-      <button class="btn bte" style="font-size:11px;padding:6px 12px" onclick="saveGC()">Guardar enlace</button>
+      <input id="gc-url" class="coach-only" placeholder="https://...gymcoach del atleta" style="flex:1;min-width:220px;background:var(--bg2);border:1px solid var(--bd);border-radius:5px;padding:7px 10px;color:var(--tx);font-family:var(--fb);font-size:13px">
+      <button class="btn bte coach-only" style="font-size:11px;padding:6px 12px" onclick="saveGC()">Guardar enlace</button>
       <button class="btn bta" style="font-size:11px;padding:6px 12px" onclick="openGC()">Abrir ↗</button>
       <button class="btn btc" style="font-size:11px;padding:6px 12px" onclick="toggleGC()">Incrustar aquí</button>
     </div>
@@ -407,6 +427,10 @@ tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)
     <div class="card">
       <div class="fg" style="margin-bottom:10px"><label>GYMCOACH PRO — enlace de la sesión del atleta</label><input id="cfg-gc" placeholder="https://..."></div>
       <div class="fg2" style="margin-bottom:10px">
+        <div class="fg"><label>🔒 PIN DEL ATLETA (lo introduce el atleta al entrar)</label><input id="cfg-pin" placeholder="ej. 1234" maxlength="8"></div>
+        <div class="fg"></div>
+      </div>
+      <div class="fg2" style="margin-bottom:10px">
         <div class="fg"><label>APPS SCRIPT URL (opcional, para sincronizar con Sheet)</label><input id="cfg-script" placeholder="https://script.google.com/macros/s/.../exec"></div>
         <div class="fg"><label>CSV URL (opcional, lectura)</label><input id="cfg-csv" placeholder="https://docs.google.com/.../pub?output=csv"></div>
       </div>
@@ -430,6 +454,10 @@ const STORE_KEY='atletadoc_'+DOC_ID;
 // ▼▼▼ PEGA AQUÍ la URL /exec de tu Apps Script y sube el archivo al repo ▼▼▼
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxv0Puj073jqGj88Y_8674tvWQ2el9-wdkO9yyNUEkE6W8YZ-S7nZdWrx_C2VJ9NgkOEQ/exec';
 // ▲▲▲ así todos los atletas sincronizan con el Sheet desde cualquier dispositivo ▲▲▲
+// ▼▼▼ CLAVE DE ENTRENADOR: con ella accedes a todo sin PIN. Enlace: atleta.html?id=nacho&coach=TU_CLAVE ▼▼▼
+const COACH_KEY='cgr-coach';
+const ROLE=(!COACH_KEY)?'coach':(Q.get('coach')===COACH_KEY?'coach':'athlete');
+function isCoach(){return ROLE==='coach';}
 const MESES=['Sep 2025','Oct 2025','Nov 2025','Dic 2025','Ene 2026','Feb 2026','Mar 2026','Abr 2026','May 2026','Jun 2026','Jul 2026','Ago 2026'];
 const FASES={A:'Acumulación','A+':'Acum. avanzada','A++':'Acum. máxima',T:'Transformación',R:'Realización',C:'Competición',RC:'Realiz.+Comp.',D:'Descanso'};
 const PHCLASS={A:'phA','A+':'phAp','A++':'phApp',I:'phI',T:'phT',R:'phR',C:'phC',RC:'phRC',D:'phD'};
@@ -449,11 +477,11 @@ function DEFAULT(){return{
   wellness:[],
   entreno:{activacion:[],principal:[],calma:[]},
   gymcoach:{url:''},
-  cfg:{script:'',csv:'',calY:2025,calM:8}
+  cfg:{script:'',csv:'',calY:2025,calM:8,pin:''}
 };}
 
 let S=load();
-S.cfg=Object.assign({script:'',csv:'',calY:2025,calM:8},S.cfg||{});
+S.cfg=Object.assign({script:'',csv:'',calY:2025,calM:8,pin:''},S.cfg||{});
 S.days=S.days||{};S.entreno=S.entreno||{activacion:[],principal:[],calma:[]};
 if(!Array.isArray(S.weeks))S.weeks=DEFAULT().weeks;
 let wdraft={fat:3,fis:3,sue:3,ani:3};
@@ -505,6 +533,7 @@ function curWeek(){
 
 // ===== TAB ROUTER =====
 function T(id){
+  if(!isCoach()&&(id==='adm'||id==='tmp'))id='res';
   document.querySelectorAll('.pnl').forEach(p=>p.classList.remove('on'));
   document.getElementById('pnl-'+id).classList.add('on');
   document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
@@ -650,12 +679,15 @@ function openDay(dkey,mes,d){
 function closeDay(){document.getElementById('wk-overlay').style.display='none';dayEdit=null;}
 function saveDay(){
   if(!dayEdit)return;if(!S.days)S.days={};
-  const fase=document.getElementById('wk-fase').value||'';
+  const prev=S.days[dayEdit]||{};
   const r=document.getElementById('wk-rpe').value;
   const nota=document.getElementById('wk-nota').value.trim();
-  const o={};if(fase)o.fase=fase;if(r!=='')o.rpe=+r;if(nota)o.nota=nota;
+  const o={};
+  if(isCoach()){const fase=document.getElementById('wk-fase').value||'';if(fase)o.fase=fase;}
+  else if(prev.fase){o.fase=prev.fase;}
+  if(r!=='')o.rpe=+r;if(nota)o.nota=nota;
   if(Object.keys(o).length)S.days[dayEdit]=o;else delete S.days[dayEdit];
-  save();closeDay();bCal();toast('✓ Día guardado');
+  save();closeDay();bCal();toast('✓ Guardado');
 }
 function clearDay(){
   if(!dayEdit)return;if(S.days)delete S.days[dayEdit];
@@ -718,11 +750,11 @@ function rEnt(){
     return `<div class="eblk">
       <div class="eblk-h">
         <div class="eblk-t"><span class="dotc" style="background:${col}"></span>${BLOQUES[bk]}</div>
-        <button class="btn bta" style="font-size:11px;padding:5px 12px" onclick="openEx('${bk}')">+ Ejercicio</button>
+        <button class="btn bta coach-only" style="font-size:11px;padding:5px 12px" onclick="openEx('${bk}')">+ Ejercicio</button>
       </div>`+
       (list.length? list.map((ex,i)=>`<div class="ex">
         <div class="ex-top"><div><div class="ex-n">${esc(ex.nombre)}</div>${ex.desc?`<div class="ex-d">${esc(ex.desc)}</div>`:''}</div>
-        <button class="btn btd" style="font-size:10px;padding:3px 8px" onclick="delEx('${bk}',${i})">✕</button></div>
+        <button class="btn btd coach-only" style="font-size:10px;padding:3px 8px" onclick="delEx('${bk}',${i})">✕</button></div>
         <div class="ex-p">
           ${ex.series?`<span class="exp"><b>Series</b> ${esc(ex.series)}</span>`:''}
           ${ex.reps?`<span class="exp"><b>Reps</b> ${esc(ex.reps)}</span>`:''}
@@ -769,6 +801,7 @@ function rAdm(){
   document.getElementById('cfg-gc').value=S.gymcoach.url||'';
   document.getElementById('cfg-script').value=S.cfg.script||SCRIPT_URL||'';
   document.getElementById('cfg-csv').value=S.cfg.csv||'';
+  document.getElementById('cfg-pin').value=S.cfg.pin||'';
   // calendario: mes de inicio + año
   const MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const cm=document.getElementById('cal-m');
@@ -815,6 +848,7 @@ function saveCfg(){
   S.gymcoach.url=document.getElementById('cfg-gc').value.trim();
   S.cfg.script=document.getElementById('cfg-script').value.trim();
   S.cfg.csv=document.getElementById('cfg-csv').value.trim();
+  S.cfg.pin=document.getElementById('cfg-pin').value.trim();
   save();toast('✓ Conexiones guardadas');
 }
 function openCF(){document.getElementById('comp-form').classList.add('open');}
@@ -848,18 +882,49 @@ document.getElementById('plan-body').addEventListener('change',function(e){
   if(f){getWeek(+f).fase=e.target.value;save();bCal();rTmp();rRes();}
   else if(r){getWeek(+r).rpe=e.target.value===''?null:+e.target.value;save();}
 });
+
+function lockGate(){
+  const p=S.perfil||{};
+  document.getElementById('pin-name').textContent=p.nombre||'Acceso';
+  document.getElementById('pin-av').textContent=initials(p.nombre||'·');
+  document.getElementById('pin-gate').style.display='flex';
+  setTimeout(()=>{const i=document.getElementById('pin-input');if(i)i.focus();},120);
+}
+function unlockGate(){document.getElementById('pin-gate').style.display='none';}
+function checkPin(){
+  const v=(document.getElementById('pin-input').value||'').trim();
+  if(v&&v===(S.cfg.pin||'')){unlockGate();reRenderActive();}
+  else{document.getElementById('pin-err').textContent='PIN incorrecto';document.getElementById('pin-input').value='';}
+}
+function evalGate(){
+  if(isCoach()){unlockGate();return;}
+  document.getElementById('pin-msg').textContent='Introduce tu PIN para ver tu documento';
+  if(S.cfg&&S.cfg.pin)lockGate();else unlockGate();
+}
+
+if(!isCoach()){document.body.classList.add('athlete');
+  document.getElementById('pin-gate').style.display='flex';
+  document.getElementById('pin-msg').textContent='Cargando…';}
 rRes();
 // Carga desde el Sheet al abrir (fuente compartida entre dispositivos)
 if(gasUrl()){
   setSync('↺ Cargando del Sheet…');
   sheetLoad(function(data){
     if(data&&typeof data==='object'){
-      S=Object.assign(DEFAULT(),data);saveLocal();reRenderActive();
+      S=Object.assign(DEFAULT(),data);
+      S.cfg=Object.assign({script:'',csv:'',calY:2025,calM:8,pin:''},S.cfg||{});
+      S.days=S.days||{};S.entreno=S.entreno||{activacion:[],principal:[],calma:[]};
+      if(!Array.isArray(S.weeks))S.weeks=DEFAULT().weeks;
+      CAL=buildCAL(S.cfg.calY,S.cfg.calM);ensureWeeks();
+      saveLocal();reRenderActive();
       setSync('✓ Cargado del Sheet · '+new Date().toLocaleTimeString().slice(0,5));
     }else{
       setSync('Sin datos en el Sheet aún (se guardará al editar)');
     }
+    evalGate();
   });
+}else{
+  evalGate();
 }
 </script>
 </body>

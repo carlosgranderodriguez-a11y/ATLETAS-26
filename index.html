@@ -167,7 +167,8 @@ function render(){
   document.getElementById('app').innerHTML=html;
 }
 
-function docLink(a){return 'atleta.html?id='+encodeURIComponent(a.id)+'&n='+encodeURIComponent(a.nombre)+'&d='+encodeURIComponent(a.disciplina);}
+const COACH_KEY='cgr-coach'; // misma clave que en atleta.html
+function docLink(a){return 'atleta.html?id='+encodeURIComponent(a.id)+'&n='+encodeURIComponent(a.nombre)+'&d='+encodeURIComponent(a.disciplina)+(COACH_KEY?'&coach='+encodeURIComponent(COACH_KEY):'');}
 function setUrl(a){
   const v=prompt('Enlace externo de '+a.nombre+' (deja vacío para usar su documento):',a.url||'');
   if(v===null)return;
