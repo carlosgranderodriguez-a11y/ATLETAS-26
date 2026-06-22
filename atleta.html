@@ -210,7 +210,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)
 <!-- CALENDARIO -->
 <div id="pnl-cal" class="pnl">
   <div class="st">Calendario de carga</div>
-  <div class="ss">Periodización semanal · pincha una semana para fijar fase, RPE y comentario</div>
+  <div class="ss">Calendario por días · pincha un día para fijar fase, RPE Físico (💪), RPE Esgrima/Técnico (🤺) y nota</div>
   <div class="cleg">
     <div class="cli"><div class="cld" style="background:rgba(80,240,144,.3)"></div>Acumulación</div>
     <div class="cli"><div class="cld" style="background:rgba(80,200,240,.3)"></div>Transformación</div>
@@ -222,12 +222,12 @@ tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)
 </div>
 
 <!-- WEEK OVERLAY -->
-<div id="wk-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:flex-start;justify-content:center;padding-top:80px" onclick="if(event.target===this)closeWk()">
+<div id="wk-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:flex-start;justify-content:center;padding-top:80px" onclick="if(event.target===this)closeDay()">
   <div style="background:var(--bg2);border:1px solid rgba(200,240,80,.35);border-radius:10px;padding:20px;width:100%;max-width:460px;margin:0 16px;box-shadow:0 20px 60px rgba(0,0,0,.5)">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
       <div><div style="font-family:var(--fh);font-size:17px;font-weight:700" id="wk-title">—</div>
       <div style="font-family:var(--fm);font-size:10px;color:var(--mu);margin-top:3px" id="wk-sub">—</div></div>
-      <button onclick="closeWk()" style="font-family:var(--fm);font-size:11px;padding:4px 10px;border-radius:4px;background:var(--bg3);border:1px solid var(--bd);color:var(--mu);cursor:pointer">✕</button>
+      <button onclick="closeDay()" style="font-family:var(--fm);font-size:11px;padding:4px 10px;border-radius:4px;background:var(--bg3);border:1px solid var(--bd);color:var(--mu);cursor:pointer">✕</button>
     </div>
     <div class="fg" style="margin-bottom:10px"><label>FASE — MOMENTO DE TEMPORADA</label>
       <select id="wk-fase">
@@ -242,10 +242,10 @@ tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)
       <div class="fg"><label style="color:#50c8f0">RPE FÍSICO</label><input id="wk-rpe" type="number" step="0.1" min="1" max="10" placeholder="ej. 3.5"></div>
       <div class="fg"><label style="color:#50f090">RPE ESGRIMA / TÉCNICO</label><input id="wk-rpe-esg" type="number" step="0.1" min="1" max="10" placeholder="ej. 4"></div>
     </div>
-    <div class="fg" style="margin-bottom:14px"><label>COMENTARIO DE LA SEMANA</label><input id="wk-nota" placeholder="Objetivos, competición, observaciones..."></div>
+    <div class="fg" style="margin-bottom:14px"><label>NOTA DEL DÍA</label><input id="wk-nota" placeholder="Objetivos, competición, observaciones..."></div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button onclick="clearWk()" style="font-family:var(--fm);font-size:11px;padding:6px 12px;border-radius:4px;background:rgba(240,80,80,.06);border:1px solid rgba(240,80,80,.25);color:var(--dg);cursor:pointer">Limpiar</button>
-      <button onclick="saveWk()" style="font-family:var(--fm);font-size:11px;padding:6px 14px;border-radius:4px;background:rgba(200,240,80,.1);border:1px solid rgba(200,240,80,.4);color:var(--ac);cursor:pointer">Guardar semana</button>
+      <button onclick="clearDay()" style="font-family:var(--fm);font-size:11px;padding:6px 12px;border-radius:4px;background:rgba(240,80,80,.06);border:1px solid rgba(240,80,80,.25);color:var(--dg);cursor:pointer">Limpiar</button>
+      <button onclick="saveDay()" style="font-family:var(--fm);font-size:11px;padding:6px 14px;border-radius:4px;background:rgba(200,240,80,.1);border:1px solid rgba(200,240,80,.4);color:var(--ac);cursor:pointer">Guardar día</button>
     </div>
   </div>
 </div>
@@ -367,6 +367,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)
       <div class="fg3">
         <div class="fg"><label>MES *</label><select id="cf-mes"></select></div>
         <div class="fg"><label>Nº SEMANA</label><input id="cf-sem" type="number" min="1" max="53" placeholder="ej. 10"></div>
+        <div class="fg"><label>DÍA (opcional)</label><input id="cf-dia" type="number" min="1" max="31" placeholder="ej. 4"></div>
         <div class="fg"><label>TIPO</label><input id="cf-tipo" placeholder="GP, Liga, Sprint..."></div>
       </div>
       <div class="fg2"><div class="fg"><label>IMPORTANCIA</label><select id="cf-imp"><option>alta</option><option>media</option><option>baja</option></select></div><div class="fg"><label>NOTAS</label><input id="cf-notas" placeholder="Objetivo..."></div></div>
@@ -418,6 +419,7 @@ const DWKS=[{"num":1,"mes":"Sep 2025","fase":"A","rpe":2.4,"notas":"Inicio tempo
 function DEFAULT(){return{
   perfil:{nombre:Q.get('n')||'Nuevo atleta',disc:Q.get('d')||'esgrima',cat:'Senior',extra:''},
   comps:[],
+  days:{},
   weeks:DWKS.map((w,i)=>({id:i+1,num:w.num,mes:w.mes,fase:w.fase,rpe:w.rpe,rpeEsg:null,notas:w.notas})),
   wellness:[],
   entreno:{activacion:[],principal:[],calma:[]},
@@ -514,46 +516,104 @@ function estado(w){
 }
 
 // ===== CALENDARIO =====
+const CAL=[
+  {mes:'Sep 2025',off:1,wks:[{n:1,s:1,e:7},{n:2,s:8,e:14},{n:3,s:15,e:21},{n:4,s:22,e:28},{n:5,s:29,e:30}]},
+  {mes:'Oct 2025',off:3,wks:[{n:5,s:1,e:5},{n:6,s:6,e:12},{n:7,s:13,e:19},{n:8,s:20,e:26},{n:9,s:27,e:31}]},
+  {mes:'Nov 2025',off:6,wks:[{n:9,s:1,e:2},{n:10,s:3,e:9},{n:11,s:10,e:16},{n:12,s:17,e:23},{n:13,s:24,e:30}]},
+  {mes:'Dic 2025',off:1,wks:[{n:14,s:1,e:7},{n:15,s:8,e:14},{n:16,s:15,e:21},{n:17,s:22,e:28},{n:18,s:29,e:31}]},
+  {mes:'Ene 2026',off:4,wks:[{n:18,s:1,e:4},{n:19,s:5,e:11},{n:20,s:12,e:18},{n:21,s:19,e:25},{n:22,s:26,e:31}]},
+  {mes:'Feb 2026',off:7,wks:[{n:22,s:1,e:1},{n:23,s:2,e:8},{n:24,s:9,e:15},{n:25,s:16,e:22},{n:26,s:23,e:28}]},
+  {mes:'Mar 2026',off:7,wks:[{n:26,s:1,e:1},{n:27,s:2,e:8},{n:28,s:9,e:15},{n:29,s:16,e:22},{n:30,s:23,e:29},{n:31,s:30,e:31}]},
+  {mes:'Abr 2026',off:3,wks:[{n:31,s:1,e:5},{n:32,s:6,e:12},{n:33,s:13,e:19},{n:34,s:20,e:26},{n:35,s:27,e:30}]},
+  {mes:'May 2026',off:5,wks:[{n:35,s:1,e:3},{n:36,s:4,e:10},{n:37,s:11,e:17},{n:38,s:18,e:24},{n:39,s:25,e:31}]},
+  {mes:'Jun 2026',off:1,wks:[{n:39,s:1,e:7},{n:40,s:8,e:14},{n:41,s:15,e:21},{n:42,s:22,e:28},{n:43,s:29,e:30}]},
+  {mes:'Jul 2026',off:3,wks:[{n:43,s:1,e:5},{n:44,s:6,e:12},{n:45,s:13,e:19},{n:46,s:20,e:26},{n:47,s:27,e:31}]},
+  {mes:'Ago 2026',off:6,wks:[{n:47,s:1,e:2},{n:48,s:3,e:9},{n:49,s:10,e:16},{n:50,s:17,e:23},{n:51,s:24,e:30},{n:52,s:31,e:31}]},
+];
+const PH={'A':'phA','A+':'phAp','A++':'phApp','I':'phI','T':'phT','R':'phR','C':'phC','RC':'phRC','D':'phD','':'emp'};
+const PC={'A':'#50f090','A+':'#50f090','A++':'#50f090','I':'#50c8f0','T':'#50c8f0','R':'#f0a050','C':'#f08080','RC':'#f06060','D':'#8888aa','':'var(--mu)'};
+const DIASW=['L','M','X','J','V','S','D'];
+
 function bCal(){
-  const body=document.getElementById('cal-body');
-  body.innerHTML=MESES.map(mes=>{
-    const wks=S.weeks.filter(w=>w.mes===mes);
-    if(!wks.length)return'';
-    return `<div class="calmo"><div class="calmo-h">${mes}</div><div class="calgr">`+
-      wks.map(w=>{
-        const ph=w.fase?(PHCLASS[w.fase]||''):'emp';
-        return `<div class="wkc cd ${ph}" onclick="openWk(${w.num})">
-          <div class="wn2">Sem ${w.num}</div>
-          <div class="wf">${w.fase?esc(w.fase):'—'}</div>
-          <div class="wrpe">${w.rpe!=null?'Fís '+w.rpe:''}${w.rpeEsg!=null?' · Esg '+w.rpeEsg:''}</div>
-          ${w.notas?`<div class="wnt">${esc(w.notas)}</div>`:''}
+  if(!S.days)S.days={};
+  let h='';
+  CAL.forEach(m=>{
+    h+=`<div id="cm-${m.mes.replace(' ','-')}" style="margin-bottom:20px"><div style="font-family:var(--fh);font-size:16px;font-weight:700;margin:14px 0 8px">${m.mes}</div>`;
+    h+=`<div class="chr"><div></div>${DIASW.map(d=>`<div class="cdh">${d}</div>`).join('')}</div>`;
+    m.wks.forEach((wl,wi)=>{
+      const wd=S.weeks.find(w=>w.num===wl.n&&w.mes===m.mes)||S.weeks.find(w=>w.num===wl.n)||{fase:'',rpe:null};
+      const isCont=wi>0&&m.wks[wi-1].n===wl.n;
+      h+=`<div class="wr"><div class="wl">${isCont?'':'S'+wl.n}</div>`;
+      const off=(wl.n===m.wks[0].n)?m.off-1:0;
+      for(let i=0;i<off;i++)h+=`<div class="cd emp"></div>`;
+      const mid=wl.s+Math.floor((wl.e-wl.s)/2);
+      for(let d=wl.s;d<=wl.e;d++){
+        const dkey=m.mes.replace(' ','-')+'-'+d;
+        const dd=S.days[dkey]||{};
+        const fase=dd.fase||wd.fase||'';
+        const pc=PH[fase]||'emp';
+        const showRpe=dd.rpe||(d===wl.s?wd.rpe:null);
+        const comps=S.comps.filter(c=>c.dia?(c.mes===m.mes&&+c.dia===d):((c.sem===wl.n)&&d===mid&&(!c.mes||c.mes===m.mes)));
+        const hc=comps.length>0;
+        h+=`<div class="cd ${pc}${hc?' hc':''}" onclick="openDay('${dkey}','${m.mes}',${d})" style="cursor:pointer">
+          <div class="dn">${d}</div>
+          <div class="dph" style="color:${PC[fase]||'var(--mu)'}">${esc(fase)}</div>
+          ${showRpe?`<div style="font-family:var(--fm);font-size:9px;color:rgba(80,200,240,.7)">💪 ${esc(showRpe)}</div>`:''}
+          ${dd.rpe_esg?`<div style="font-family:var(--fm);font-size:9px;color:rgba(80,240,144,.8)">🤺 ${esc(dd.rpe_esg)}</div>`:''}
+          ${dd.nota?`<div style="font-size:9px;margin-top:3px;color:var(--bl);line-height:1.3;word-break:break-word">${esc(dd.nota)}</div>`:''}
+          ${comps.length?`<div class="dcmp">${comps.map(c=>esc(c.name)).join(', ')}</div>`:''}
         </div>`;
-      }).join('')+`</div></div>`;
-  }).join('');
+      }
+      const used=off+(wl.e-wl.s+1);
+      for(let i=used;i<7;i++)h+=`<div class="cd emp"></div>`;
+      const dys=[];for(let d=wl.s;d<=wl.e;d++){dys.push(S.days[m.mes.replace(' ','-')+'-'+d]||{});}
+      const fis=dys.map(x=>x.rpe).filter(v=>v!=null&&v!=='');
+      const esg=dys.map(x=>x.rpe_esg).filter(v=>v!=null&&v!=='');
+      const aF=fis.length?Math.round(fis.reduce((a,b)=>a+parseFloat(b),0)/fis.length*10)/10:null;
+      const aE=esg.length?Math.round(esg.reduce((a,b)=>a+parseFloat(b),0)/esg.length*10)/10:null;
+      const tot=(aF!=null&&aE!=null)?Math.round((aF+aE)/2*10)/10:null;
+      h+=`<div class="cd" style="min-width:90px;max-width:90px;background:rgba(255,255,255,.03);border-left:2px solid var(--bd);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 4px">
+        <div style="font-family:var(--fm);font-size:8px;color:var(--mu);letter-spacing:.05em">CARGA</div>
+        <div style="font-size:10px;color:rgba(80,200,240,.8)">💪 ${aF!=null?aF:'—'}</div>
+        <div style="font-size:10px;color:rgba(80,240,144,.8)">🤺 ${aE!=null?aE:'—'}</div>
+        ${tot!=null?`<div style="font-size:11px;font-weight:700;color:var(--ac);margin-top:2px;border-top:1px solid var(--bd);padding-top:3px;width:100%;text-align:center">⚡ ${tot}</div>`:''}
+      </div></div>`;
+    });
+    h+=`</div>`;
+  });
+  document.getElementById('cal-body').innerHTML=h;
 }
-let wkEdit=null;
-function openWk(num){
-  const w=S.weeks.find(x=>x.num===num);if(!w)return;wkEdit=num;
-  document.getElementById('wk-title').textContent='Semana '+w.num;
-  document.getElementById('wk-sub').textContent=w.mes;
-  document.getElementById('wk-fase').value=w.fase||'';
-  document.getElementById('wk-rpe').value=w.rpe!=null?w.rpe:'';
-  document.getElementById('wk-rpe-esg').value=w.rpeEsg!=null?w.rpeEsg:'';
-  document.getElementById('wk-nota').value=w.notas||'';
+function findWeekForDay(mes,d){
+  const mcal=CAL.find(x=>x.mes===mes);if(!mcal)return null;
+  const wl=mcal.wks.find(w=>d>=w.s&&d<=w.e);if(!wl)return null;
+  return S.weeks.find(w=>w.num===wl.n&&w.mes===mes)||S.weeks.find(w=>w.num===wl.n)||{num:wl.n,fase:''};
+}
+let dayEdit=null;
+function openDay(dkey,mes,d){
+  if(!S.days)S.days={};
+  dayEdit=dkey;
+  const dd=S.days[dkey]||{};const wk=findWeekForDay(mes,d);
+  document.getElementById('wk-title').textContent=d+' · '+mes;
+  document.getElementById('wk-sub').textContent='Semana '+(wk?wk.num:'—');
+  document.getElementById('wk-fase').value=dd.fase||(wk?wk.fase:'')||'';
+  document.getElementById('wk-rpe').value=dd.rpe!=null?dd.rpe:'';
+  document.getElementById('wk-rpe-esg').value=dd.rpe_esg!=null?dd.rpe_esg:'';
+  document.getElementById('wk-nota').value=dd.nota||'';
   document.getElementById('wk-overlay').style.display='flex';
 }
-function closeWk(){document.getElementById('wk-overlay').style.display='none';wkEdit=null;}
-function saveWk(){
-  const w=S.weeks.find(x=>x.num===wkEdit);if(!w)return;
-  w.fase=document.getElementById('wk-fase').value||'';
+function closeDay(){document.getElementById('wk-overlay').style.display='none';dayEdit=null;}
+function saveDay(){
+  if(!dayEdit)return;if(!S.days)S.days={};
+  const fase=document.getElementById('wk-fase').value||'';
   const r=document.getElementById('wk-rpe').value,re=document.getElementById('wk-rpe-esg').value;
-  w.rpe=r===''?null:+r;w.rpeEsg=re===''?null:+re;
-  w.notas=document.getElementById('wk-nota').value.trim();
-  save();closeWk();bCal();toast('✓ Semana guardada');
+  const nota=document.getElementById('wk-nota').value.trim();
+  const o={};if(fase)o.fase=fase;if(r!=='')o.rpe=+r;if(re!=='')o.rpe_esg=+re;if(nota)o.nota=nota;
+  if(Object.keys(o).length)S.days[dayEdit]=o;else delete S.days[dayEdit];
+  save();closeDay();bCal();toast('✓ Día guardado');
 }
-function clearWk(){
-  const w=S.weeks.find(x=>x.num===wkEdit);if(!w)return;
-  w.fase='';w.rpe=null;w.rpeEsg=null;w.notas='';save();closeWk();bCal();toast('Semana limpiada');
+function clearDay(){
+  if(!dayEdit)return;if(S.days)delete S.days[dayEdit];
+  save();closeDay();bCal();toast('Día limpiado');
 }
 
 // ===== TEMPORADA =====
@@ -685,9 +745,10 @@ function saveComp(){
   const name=document.getElementById('cf-name').value.trim();if(!name){toast('Pon un nombre');return;}
   S.comps.push({id:Date.now(),name,lugar:document.getElementById('cf-lugar').value.trim(),
     mes:document.getElementById('cf-mes').value,sem:+document.getElementById('cf-sem').value||null,
+    dia:+document.getElementById('cf-dia').value||null,
     tipo:document.getElementById('cf-tipo').value.trim(),imp:document.getElementById('cf-imp').value,
     notas:document.getElementById('cf-notas').value.trim()});
-  save();['cf-name','cf-lugar','cf-sem','cf-tipo','cf-notas'].forEach(f=>document.getElementById(f).value='');
+  save();['cf-name','cf-lugar','cf-sem','cf-dia','cf-tipo','cf-notas'].forEach(f=>document.getElementById(f).value='');
   closeCF();rACList();toast('✓ Competición añadida');
 }
 function delComp(id){S.comps=S.comps.filter(c=>c.id!==id);save();rACList();}
