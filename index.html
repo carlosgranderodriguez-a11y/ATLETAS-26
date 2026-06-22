@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atletas · Panel general</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0F1217;--surface:#171B22;--surface-2:#1E232C;--line:#2A313C;--line-soft:#222831;
+    --text:#E7EBF0;--text-dim:#9AA5B3;--text-faint:#646F7D;
+    --futbol:#E5022C;--esgrima:#2E6BC0;--triatlon:#F5A623;--readapt:#3F9D6D;--fitness:#8B6DF0;
+    --rad:14px;
+    --display:'Barlow Condensed',system-ui,sans-serif;--body:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--ink);color:var(--text);font-family:var(--body);-webkit-font-smoothing:antialiased}
+  body{min-height:100vh;background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(46,107,192,.10), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(229,2,44,.07), transparent 55%),var(--ink);}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 90px}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+  .topbar{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-bottom:22px;border-bottom:1px solid var(--line-soft);margin-bottom:26px}
+  .brand{display:flex;flex-direction:column;gap:2px}
+  .brand .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--text-faint)}
+  .brand h1{font-family:var(--display);font-weight:800;font-size:clamp(34px,5vw,52px);line-height:.92;letter-spacing:-.01em;text-transform:uppercase}
+  .brand h1 b{color:var(--futbol)}
+  .summary{display:flex;gap:10px;flex-wrap:wrap}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 15px;min-width:78px}
+  .stat .n{font-family:var(--mono);font-weight:700;font-size:22px;line-height:1}
+  .stat .l{font-size:10.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-top:5px}
+
+  .section{margin-bottom:32px}
+  .sec-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .sec-stripe{width:34px;height:4px;border-radius:3px}
+  .sec-head h2{font-family:var(--display);font-weight:700;font-size:21px;letter-spacing:.04em;text-transform:uppercase}
+  .sec-head .count{font-family:var(--mono);font-size:12px;color:var(--text-faint)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:14px}
+
+  .card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--rad);padding:17px 18px 16px;overflow:hidden;transition:transform .14s ease,border-color .14s ease,background .14s ease;cursor:pointer}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c)}
+  .card:hover{transform:translateY(-3px);border-color:var(--c);background:var(--surface-2)}
+  .card:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+  .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+  .card .name{font-family:var(--display);font-weight:700;font-size:23px;line-height:1;letter-spacing:.01em}
+  .card .sub{font-size:12px;color:var(--text-dim);margin-top:5px}
+  .dot{width:11px;height:11px;border-radius:50%;flex:none;margin-top:4px;box-shadow:0 0 0 4px color-mix(in srgb,var(--s) 22%,transparent)}
+
+  .card-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line-soft);padding-top:12px;margin-top:13px}
+  .go{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500}
+  .go .arrow{font-family:var(--mono)}
+  .go.linked{color:var(--c)}
+  .go.empty{color:var(--text-faint)}
+  .editlink{font-size:13px;color:var(--text-faint);padding:5px 8px;border-radius:8px;line-height:1;z-index:2;position:relative}
+  .editlink:hover{color:var(--text);background:var(--line-soft)}
+  .url-preview{font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
+  .addcard{border:1px dashed var(--line);background:transparent;border-radius:var(--rad);min-height:124px;display:flex;align-items:center;justify-content:center;gap:9px;color:var(--text-faint);font-weight:500;transition:all .14s ease;width:100%}
+  .addcard:hover{border-color:var(--text-dim);color:var(--text-dim);background:var(--surface)}
+  .addcard .plus{font-size:20px;line-height:1}
+
+  .hint{font-size:12px;color:var(--text-faint);margin-top:26px;text-align:center;line-height:1.6}
+  .hint b{color:var(--text-dim);font-weight:500}
+
+  .savetag{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface-2);border:1px solid var(--line);color:var(--text-dim);font-family:var(--mono);font-size:11px;padding:8px 16px;border-radius:30px;opacity:0;transition:all .25s ease;pointer-events:none;z-index:40}
+  .savetag.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .savetag.warn{color:var(--triatlon);border-color:color-mix(in srgb,var(--triatlon) 40%,var(--line))}
+
+  @media(max-width:680px){.summary{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap"><div id="app"></div></div>
+<div class="savetag" id="savetag">Guardado</div>
+
+<script>
+const DISC={
+  futbol:{label:'Fútbol',icon:'⚽',color:'#E5022C'},
+  esgrima:{label:'Esgrima',icon:'🤺',color:'#2E6BC0'},
+  triatlon:{label:'Triatlón',icon:'🏊',color:'#F5A623'},
+  readaptacion:{label:'Readaptación',icon:'🩹',color:'#3F9D6D'},
+  fitness:{label:'Fitness / Fuerza',icon:'🏋',color:'#8B6DF0'},
+  multideporte:{label:'Multideporte',icon:'🏅',color:'#1FA8A0'},
+};
+const DISC_ORDER=['futbol','esgrima','triatlon','readaptacion','fitness','multideporte'];
+const ESTADO={disponible:'#3FB87A',carga:'#F5A623',readapt:'#2E6BC0',lesion:'#E5022C'};
+
+const SEED=[
+  {id:'nacho',nombre:'Nacho',disciplina:'triatlon',sub:'Triatlón · Sprint/Olímpico',estado:'carga',url:''},
+  {id:'madrigal',nombre:'Santiago Madrigal',disciplina:'esgrima',sub:'Sable Masculino',estado:'disponible',url:''},
+  {id:'olangua',nombre:'Asier Olangua',disciplina:'esgrima',sub:'Sable Masculino',estado:'disponible',url:''},
+  {id:'guada-juv',nombre:'Juvenil DH',disciplina:'futbol',sub:'CD Guadalajara · 1-4-2-3-1',estado:'disponible',url:''},
+  {id:'alicia',nombre:'Alicia',disciplina:'readaptacion',sub:'Rodilla / cadera',estado:'readapt',url:''},
+  {id:'villegas',nombre:'Marco Villegas',disciplina:'futbol',sub:'Futbolista',estado:'disponible',url:''},
+  {id:'chypi',nombre:'Chiprian Pérez',disciplina:'futbol',sub:'Chypi · Futbolista',estado:'disponible',url:''},
+  {id:'mateos',nombre:'Marco Mateos',disciplina:'esgrima',sub:'Esgrimista',estado:'disponible',url:''},
+  {id:'comesana',nombre:'Javi Comesaña',disciplina:'multideporte',sub:'Multideporte',estado:'disponible',url:''},
+  {id:'villaescusa',nombre:'Nacho Villaescusa',disciplina:'multideporte',sub:'Sancho · Readaptación',estado:'readapt',url:''},
+];
+
+const STORE_KEY='atletas_launcher_v1';
+let store={ok:false};
+try{const t='__t';localStorage.setItem(t,'1');localStorage.removeItem(t);store.ok=true;}catch(e){store.ok=false;}
+function load(){
+  let saved=null;
+  if(store.ok){try{const r=localStorage.getItem(STORE_KEY);if(r)saved=JSON.parse(r);}catch(e){}}
+  if(!saved)return JSON.parse(JSON.stringify(SEED));
+  const ids=new Set(saved.map(a=>a.id));
+  SEED.forEach(s=>{if(!ids.has(s.id))saved.push(JSON.parse(JSON.stringify(s)));});
+  return saved;
+}
+let saveTimer=null;
+function save(){if(store.ok){try{localStorage.setItem(STORE_KEY,JSON.stringify(state.athletes));flash('Guardado');return;}catch(e){}}flash('Modo demo · descarga el archivo para guardar',true);}
+function flash(msg,warn){const el=document.getElementById('savetag');el.textContent=msg;el.classList.toggle('warn',!!warn);el.classList.add('show');clearTimeout(saveTimer);saveTimer=setTimeout(()=>el.classList.remove('show'),1800);}
+
+let state={athletes:load()};
+function esc(s){return(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function uid(){return 'a'+Math.random().toString(36).slice(2,8);}
+function shortUrl(u){return u.replace(/^https?:\/\//,'').replace(/\/$/,'');}
+
+function render(){
+  const ath=state.athletes;
+  const conPagina=ath.filter(a=>a.url).length;
+  let html=`
+    <div class="topbar">
+      <div class="brand"><span class="eyebrow">Panel general</span><h1>Mis <b>Atletas</b></h1></div>
+      <div class="summary">
+        <div class="stat"><div class="n">${ath.length}</div><div class="l">Atletas</div></div>
+        <div class="stat"><div class="n">${DISC_ORDER.filter(d=>ath.some(a=>a.disciplina===d)).length}</div><div class="l">Disciplinas</div></div>
+        <div class="stat"><div class="n">${conPagina}</div><div class="l">Enlace propio</div></div>
+      </div>
+    </div>`;
+
+  DISC_ORDER.forEach(dk=>{
+    const list=ath.filter(a=>a.disciplina===dk);if(!list.length)return;
+    const d=DISC[dk];
+    html+=`<section class="section">
+      <div class="sec-head"><span class="sec-stripe" style="background:${d.color}"></span><h2>${d.icon} ${esc(d.label)}</h2><span class="count">${list.length}</span></div>
+      <div class="grid">`;
+    list.forEach(a=>{
+      const s=ESTADO[a.estado]||ESTADO.disponible;
+      const has=!!a.url;
+      html+=`<div class="card" data-go="${a.id}" tabindex="0" role="link" style="--c:${d.color};--s:${s}">
+        <div class="card-top">
+          <div><div class="name">${esc(a.nombre)}</div><div class="sub">${esc(a.sub||d.label)}</div></div>
+          <span class="dot" style="background:${s};--s:${s}"></span>
+        </div>
+        <div class="url-preview">${has?'↗ '+esc(shortUrl(a.url)):'→ documento del atleta'}</div>
+        <div class="card-foot">
+          <span class="go linked">Abrir ${has?'enlace ↗':'documento ↗'}</span>
+          <button class="editlink" data-editurl="${a.id}" title="Enlace externo (opcional)">✎</button>
+        </div>
+      </div>`;
+    });
+    html+=`</div></section>`;
+  });
+
+  html+=`<section class="section"><div class="grid">
+    <button class="addcard" data-add="1"><span class="plus">＋</span> Añadir atleta</button>
+  </div></section>
+  <p class="hint">Pincha una tarjeta para abrir el <b>documento del atleta</b>. Usa <b>✎</b> solo si quieres apuntar a un dashboard externo propio.</p>`;
+
+  document.getElementById('app').innerHTML=html;
+}
+
+function docLink(a){return 'atleta.html?id='+encodeURIComponent(a.id)+'&n='+encodeURIComponent(a.nombre)+'&d='+encodeURIComponent(a.disciplina);}
+function setUrl(a){
+  const v=prompt('Enlace externo de '+a.nombre+' (deja vacío para usar su documento):',a.url||'');
+  if(v===null)return;
+  a.url=v.trim();save();render();
+}
+function openPage(a){const link=a.url||docLink(a);location.href=link;}
+
+document.getElementById('app').addEventListener('click',e=>{
+  const ed=e.target.closest('[data-editurl]');
+  if(ed){const a=state.athletes.find(x=>x.id===ed.dataset.editurl);return setUrl(a);}
+  const go=e.target.closest('[data-go]');
+  if(go){const a=state.athletes.find(x=>x.id===go.dataset.go);return openPage(a);}
+  if(e.target.closest('[data-add]'))return addAthlete();
+});
+document.getElementById('app').addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&e.target.dataset.go){e.preventDefault();const a=state.athletes.find(x=>x.id===e.target.dataset.go);openPage(a);}
+});
+
+function addAthlete(){
+  const nombre=prompt('Nombre del atleta:');if(!nombre)return;
+  const di=prompt('Disciplina:\n'+DISC_ORDER.map((k,i)=>`${i+1}. ${DISC[k].label}`).join('\n')+'\n\nNúmero:','1');
+  const dk=DISC_ORDER[(+di||1)-1]||'futbol';
+  const url=prompt('Enlace de su página (opcional, puedes dejarlo vacío):','')||'';
+  state.athletes.push({id:uid(),nombre:nombre.trim(),disciplina:dk,sub:DISC[dk].label,estado:'disponible',url:url.trim()});
+  save();render();
+}
+
+render();
+if(!store.ok)setTimeout(()=>flash('Modo demo · descarga el archivo para que se guarden los enlaces',true),700);
+</script>
+</body>
+</html>
