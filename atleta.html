@@ -398,7 +398,11 @@ body.athlete .coach-only{display:none!important}
   <div class="ads">
     <div class="adst">Planificación de carga</div>
     <div class="card">
-      <div class="ss" style="margin-bottom:6px">Fase (momento de temporada) y RPE objetivo de cada semana. Se refleja en el calendario.</div>
+      <div class="ss" style="margin-bottom:8px">Fase (momento de temporada) y RPE objetivo de cada semana. Se refleja en el calendario.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="btn bts" style="font-size:11px;padding:6px 12px" onclick="fillPlanDic()">⚡ Rellenar hasta diciembre</button>
+        <button class="btn btd" style="font-size:11px;padding:6px 12px" onclick="clearPlan()">Vaciar planificación</button>
+      </div>
       <div id="plan-body" style="max-height:440px;overflow-y:auto;padding-right:4px"></div>
     </div>
   </div>
@@ -837,6 +841,25 @@ function applyCal(){
   S.cfg.calY=+document.getElementById('cal-y').value||2025;
   CAL=buildCAL(S.cfg.calY,S.cfg.calM);ensureWeeks();save();
   rAdm();bCal();rTmp();rRes();toast('✓ Calendario actualizado');
+}
+function fillPlanDic(){
+  if(!confirm('Rellenar la planificación hasta diciembre con una periodización base (Acumulación → Transformación → Realización → Competición, descarga cada 4ª semana). Sobrescribe las fases hasta diciembre. ¿Continuar?'))return;
+  const order=[];const seen=new Set();let llegoDic=false;
+  for(const m of CAL){for(const w of m.wks){if(!seen.has(w.n)){seen.add(w.n);order.push(w.n);}}if(/^Dic/.test(m.mes)){llegoDic=true;break;}}
+  const meso=[['A','A','A+'],['A+','A++','A++'],['T','T','T'],['R','R','C']];
+  const rpe={A:3,'A+':3.5,'A++':4,T:4,R:3.5,C:2.5,D:1.5};
+  order.forEach((n,idx)=>{
+    const mi=Math.floor(idx/4)%meso.length,pos=idx%4;
+    const fase=pos===3?'D':meso[mi][pos];
+    const w=getWeek(n);w.fase=fase;w.rpe=rpe[fase];
+  });
+  save();bCal();rTmp();rRes();rPlan();
+  toast('✓ Planificación rellenada hasta diciembre ('+order.length+' semanas)');
+}
+function clearPlan(){
+  if(!confirm('¿Vaciar todas las fases y RPE objetivo de la planificación?'))return;
+  S.weeks.forEach(w=>{w.fase='';w.rpe=null;});
+  save();bCal();rTmp();rRes();rPlan();toast('Planificación vaciada');
 }
 function saveProfile(){
   S.perfil={nombre:document.getElementById('p-nombre').value.trim()||'Atleta',
