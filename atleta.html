@@ -473,19 +473,27 @@ const BLOQUECOL={activacion:'#50f090',principal:'#c8f050',calma:'#50c8f0'};
 
 const DWKS=[{"num":1,"mes":"Sep 2025","fase":"A","rpe":2.4,"notas":"Inicio temporada"},{"num":2,"mes":"Sep 2025","fase":"A+","rpe":5,"notas":""},{"num":3,"mes":"Sep 2025","fase":"A++","rpe":null,"notas":""},{"num":4,"mes":"Sep 2025","fase":"C","rpe":3.2,"notas":""},{"num":5,"mes":"Sep 2025","fase":"T","rpe":3,"notas":""},{"num":6,"mes":"Oct 2025","fase":"R","rpe":3.2,"notas":""},{"num":7,"mes":"Oct 2025","fase":"C","rpe":null,"notas":""},{"num":8,"mes":"Oct 2025","fase":"RC","rpe":null,"notas":""},{"num":9,"mes":"Oct 2025","fase":"A","rpe":null,"notas":""},{"num":10,"mes":"Nov 2025","fase":"C","rpe":null,"notas":""},{"num":11,"mes":"Nov 2025","fase":"A","rpe":3,"notas":""},{"num":12,"mes":"Nov 2025","fase":"A+","rpe":4,"notas":""},{"num":13,"mes":"Nov 2025","fase":"T","rpe":3.5,"notas":""},{"num":14,"mes":"Dic 2025","fase":"RC","rpe":null,"notas":""},{"num":15,"mes":"Dic 2025","fase":"A","rpe":3,"notas":""},{"num":16,"mes":"Dic 2025","fase":"C","rpe":null,"notas":""},{"num":17,"mes":"Dic 2025","fase":"A","rpe":null,"notas":""},{"num":18,"mes":"Dic 2025","fase":"T","rpe":2,"notas":"Transición Navidad"},{"num":19,"mes":"Ene 2026","fase":"RC","rpe":null,"notas":""},{"num":20,"mes":"Ene 2026","fase":"A","rpe":3,"notas":""},{"num":21,"mes":"Ene 2026","fase":"T","rpe":3.5,"notas":""},{"num":22,"mes":"Ene 2026","fase":"R","rpe":2.5,"notas":""},{"num":23,"mes":"Feb 2026","fase":"C","rpe":null,"notas":""},{"num":24,"mes":"Feb 2026","fase":"A","rpe":3.5,"notas":""},{"num":25,"mes":"Feb 2026","fase":"A+","rpe":4,"notas":""},{"num":26,"mes":"Feb 2026","fase":"T","rpe":3.5,"notas":""},{"num":27,"mes":"Mar 2026","fase":"RC","rpe":null,"notas":""},{"num":28,"mes":"Mar 2026","fase":"A","rpe":3,"notas":""},{"num":29,"mes":"Mar 2026","fase":"RC","rpe":null,"notas":""},{"num":30,"mes":"Mar 2026","fase":"A","rpe":3.5,"notas":""},{"num":31,"mes":"Mar 2026","fase":"A+","rpe":4,"notas":""},{"num":32,"mes":"Abr 2026","fase":"A++","rpe":4.5,"notas":""},{"num":33,"mes":"Abr 2026","fase":"T","rpe":3.5,"notas":""},{"num":34,"mes":"Abr 2026","fase":"R","rpe":3,"notas":""},{"num":35,"mes":"Abr 2026","fase":"C","rpe":null,"notas":""},{"num":36,"mes":"May 2026","fase":"RC","rpe":null,"notas":""},{"num":37,"mes":"May 2026","fase":"A","rpe":3.5,"notas":""},{"num":38,"mes":"May 2026","fase":"RC","rpe":null,"notas":""},{"num":39,"mes":"May 2026","fase":"A","rpe":3,"notas":""},{"num":40,"mes":"Jun 2026","fase":"C","rpe":null,"notas":""},{"num":41,"mes":"Jun 2026","fase":"T","rpe":3.5,"notas":""},{"num":42,"mes":"Jun 2026","fase":"RC","rpe":null,"notas":""},{"num":43,"mes":"Jun 2026","fase":"A","rpe":2.5,"notas":""},{"num":44,"mes":"Jul 2026","fase":"A+","rpe":3.5,"notas":""},{"num":45,"mes":"Jul 2026","fase":"T","rpe":3,"notas":""},{"num":46,"mes":"Jul 2026","fase":"RC","rpe":null,"notas":""},{"num":47,"mes":"Jul 2026","fase":"T","rpe":2,"notas":""},{"num":48,"mes":"Ago 2026","fase":"A","rpe":2.5,"notas":""},{"num":49,"mes":"Ago 2026","fase":"A+","rpe":3.5,"notas":""},{"num":50,"mes":"Ago 2026","fase":"T","rpe":3,"notas":""},{"num":51,"mes":"Ago 2026","fase":"RC","rpe":null,"notas":""},{"num":52,"mes":"Ago 2026","fase":"T","rpe":1.5,"notas":"Fin temporada"}];
 
+function makePlan(n){
+  const meso=[['A','A','A+'],['A+','A++','A++'],['T','T','T'],['R','R','C']];
+  const rpe={A:3,'A+':3.5,'A++':4,T:4,R:3.5,C:2.5,D:1.5};
+  const arr=[];
+  for(let i=0;i<n;i++){const mi=Math.floor(i/4)%meso.length,pos=i%4;const fase=pos===3?'D':meso[mi][pos];arr.push({num:i+1,fase:fase,rpe:rpe[fase]});}
+  return arr;
+}
+
 function DEFAULT(){return{
   perfil:{nombre:Q.get('n')||'Nuevo atleta',disc:Q.get('d')||'esgrima',cat:'Senior',extra:''},
   comps:[],
   days:{},
-  weeks:DWKS.map(w=>({num:w.num,fase:w.fase,rpe:w.rpe})),
+  weeks:makePlan(53),
   wellness:[],
   entreno:{activacion:[],principal:[],calma:[]},
   gymcoach:{url:''},
-  cfg:{script:'',csv:'',calY:2025,calM:8,pin:''}
+  cfg:{script:'',csv:'',calY:2026,calM:0,pin:''}
 };}
 
 let S=load();
-S.cfg=Object.assign({script:'',csv:'',calY:2025,calM:8,pin:''},S.cfg||{});
+S.cfg=Object.assign({script:'',csv:'',calY:2026,calM:0,pin:''},S.cfg||{});
 S.days=S.days||{};S.entreno=S.entreno||{activacion:[],principal:[],calma:[]};
 if(!Array.isArray(S.weeks))S.weeks=DEFAULT().weeks;
 let wdraft={fat:3,fis:3,sue:3,ani:3};
@@ -612,7 +620,7 @@ function ensureWeeks(){
 }
 function calMeses(){return CAL.map(m=>m.mes);}
 function weekFirstMonth(n){const m=CAL.find(mm=>mm.wks.some(w=>w.n===n));return m?m.mes:'';}
-let CAL=buildCAL((S.cfg&&S.cfg.calY)||2025,(S.cfg&&S.cfg.calM!=null)?S.cfg.calM:8);
+let CAL=buildCAL((S.cfg&&S.cfg.calY)||2026,(S.cfg&&S.cfg.calM!=null)?S.cfg.calM:0);
 ensureWeeks();
 const PH={'A':'phA','A+':'phAp','A++':'phApp','I':'phI','T':'phT','R':'phR','C':'phC','RC':'phRC','D':'phD','':'emp'};
 const PC={'A':'#50f090','A+':'#50f090','A++':'#50f090','I':'#50c8f0','T':'#50c8f0','R':'#f0a050','C':'#f08080','RC':'#f06060','D':'#8888aa','':'var(--mu)'};
@@ -935,7 +943,7 @@ if(gasUrl()){
   sheetLoad(function(data){
     if(data&&typeof data==='object'){
       S=Object.assign(DEFAULT(),data);
-      S.cfg=Object.assign({script:'',csv:'',calY:2025,calM:8,pin:''},S.cfg||{});
+      S.cfg=Object.assign({script:'',csv:'',calY:2026,calM:0,pin:''},S.cfg||{});
       S.days=S.days||{};S.entreno=S.entreno||{activacion:[],principal:[],calma:[]};
       if(!Array.isArray(S.weeks))S.weeks=DEFAULT().weeks;
       CAL=buildCAL(S.cfg.calY,S.cfg.calM);ensureWeeks();
