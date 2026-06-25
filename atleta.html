@@ -272,7 +272,7 @@ body.athlete .coach-only{display:none!important}
 <!-- TEMPORADA -->
 <div id="pnl-tmp" class="pnl">
   <div class="st">Vista anual de temporada</div>
-  <div class="ss">Sep 2025 – Ago 2026</div>
+  <div class="ss" id="tmp-range">—</div>
   <div class="card mb">
     <div class="ct">Línea de tiempo semanal</div>
     <div class="tlw"><div id="tl-body"></div></div>
@@ -416,8 +416,11 @@ body.athlete .coach-only{display:none!important}
       <div class="fg3">
         <div class="fg"><label>MES *</label><select id="cf-mes"></select></div>
         <div class="fg"><label>Nº SEMANA</label><input id="cf-sem" type="number" min="1" max="53" placeholder="ej. 10"></div>
-        <div class="fg"><label>DÍA (opcional)</label><input id="cf-dia" type="number" min="1" max="31" placeholder="ej. 4"></div>
         <div class="fg"><label>TIPO</label><input id="cf-tipo" placeholder="GP, Liga, Sprint..."></div>
+      </div>
+      <div class="fg2">
+        <div class="fg"><label>DÍA INICIO (opcional)</label><input id="cf-dia" type="number" min="1" max="31" placeholder="ej. 4"></div>
+        <div class="fg"><label>DÍA FIN (opcional)</label><input id="cf-dia-fin" type="number" min="1" max="31" placeholder="ej. 6"></div>
       </div>
       <div class="fg2"><div class="fg"><label>IMPORTANCIA</label><select id="cf-imp"><option>alta</option><option>media</option><option>baja</option></select></div><div class="fg"><label>NOTAS</label><input id="cf-notas" placeholder="Objetivo..."></div></div>
       <div class="fact"><button class="btn btc" onclick="closeCF()">Cancelar</button><button class="btn bts" onclick="saveComp()">Guardar</button></div>
@@ -450,7 +453,7 @@ body.athlete .coach-only{display:none!important}
 
 </main>
 <div class="toast" id="toast"></div>
-<div id="ver-tag" style="position:fixed;bottom:6px;right:9px;font-family:var(--fm);font-size:9px;color:var(--mu);opacity:.55;z-index:60;pointer-events:none">v7 · Ene–Dic</div>
+<div id="ver-tag" style="position:fixed;bottom:6px;right:9px;font-family:var(--fm);font-size:9px;color:var(--mu);opacity:.55;z-index:60;pointer-events:none">v9 · Ene–Dic</div>
 <script>
 // ===== CONFIG =====
 const Q=new URLSearchParams(location.search);
@@ -646,7 +649,10 @@ function bCal(){
         const fase=dd.fase||wd.fase||'';
         const pc=PH[fase]||'emp';
         const showRpe=dd.rpe||(d===wl.s?wd.rpe:null);
-        const comps=S.comps.filter(c=>c.dia?(c.mes===m.mes&&+c.dia===d):((c.sem===wl.n)&&d===mid&&(!c.mes||c.mes===m.mes)));
+        const comps=S.comps.filter(c=>{
+          if(c.dia){const ini=+c.dia,fin=+(c.diaFin||c.dia);return c.mes===m.mes&&d>=Math.min(ini,fin)&&d<=Math.max(ini,fin);}
+          return (c.sem===wl.n)&&d===mid&&(!c.mes||c.mes===m.mes);
+        });
         const hc=comps.length>0;
         h+=`<div class="cd ${pc}${hc?' hc':''}" onclick="openDay('${dkey}','${m.mes}',${d})" style="cursor:pointer">
           <div class="dn">${d}</div>
@@ -709,6 +715,7 @@ function clearDay(){
 
 // ===== TEMPORADA =====
 function rTmp(){
+  const tr=document.getElementById('tmp-range');if(tr&&CAL.length)tr.textContent=CAL[0].mes+' – '+CAL[CAL.length-1].mes;
   document.getElementById('tl-body').innerHTML=
     `<div class="tlr"><div class="tll">Periodización</div><div class="tlks">`+
     S.weeks.map(w=>{const c=w.fase?(TWCLASS[w.fase]||'twE'):'twE';
@@ -883,22 +890,44 @@ function saveCfg(){
   S.cfg.pin=document.getElementById('cfg-pin').value.trim();
   save();toast('✓ Conexiones guardadas');
 }
-function openCF(){document.getElementById('comp-form').classList.add('open');}
-function closeCF(){document.getElementById('comp-form').classList.remove('open');}
+let editingCompId=null;
+function clearCF(){['cf-name','cf-lugar','cf-sem','cf-dia','cf-dia-fin','cf-tipo','cf-notas'].forEach(f=>document.getElementById(f).value='');document.getElementById('cf-imp').value='alta';}
+function openCF(){editingCompId=null;clearCF();document.querySelector('#comp-form .iforamt').textContent='NUEVA COMPETICIÓN';document.getElementById('comp-form').classList.add('open');}
+function closeCF(){editingCompId=null;document.getElementById('comp-form').classList.remove('open');}
+function editComp(id){
+  const c=S.comps.find(x=>x.id===id);if(!c)return;
+  editingCompId=id;
+  document.getElementById('cf-name').value=c.name||'';
+  document.getElementById('cf-lugar').value=c.lugar||'';
+  document.getElementById('cf-mes').value=c.mes||'';
+  document.getElementById('cf-sem').value=c.sem||'';
+  document.getElementById('cf-dia').value=c.dia||'';
+  document.getElementById('cf-dia-fin').value=c.diaFin||'';
+  document.getElementById('cf-tipo').value=c.tipo||'';
+  document.getElementById('cf-imp').value=c.imp||'alta';
+  document.getElementById('cf-notas').value=c.notas||'';
+  document.querySelector('#comp-form .iforamt').textContent='EDITAR COMPETICIÓN';
+  document.getElementById('comp-form').classList.add('open');
+  document.getElementById('comp-form').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 function saveComp(){
   const name=document.getElementById('cf-name').value.trim();if(!name){toast('Pon un nombre');return;}
-  S.comps.push({id:Date.now(),name,lugar:document.getElementById('cf-lugar').value.trim(),
+  const data={name,lugar:document.getElementById('cf-lugar').value.trim(),
     mes:document.getElementById('cf-mes').value,sem:+document.getElementById('cf-sem').value||null,
-    dia:+document.getElementById('cf-dia').value||null,
+    dia:+document.getElementById('cf-dia').value||null,diaFin:+document.getElementById('cf-dia-fin').value||null,
     tipo:document.getElementById('cf-tipo').value.trim(),imp:document.getElementById('cf-imp').value,
-    notas:document.getElementById('cf-notas').value.trim()});
-  save();['cf-name','cf-lugar','cf-sem','cf-dia','cf-tipo','cf-notas'].forEach(f=>document.getElementById(f).value='');
-  closeCF();rACList();toast('✓ Competición añadida');
+    notas:document.getElementById('cf-notas').value.trim()};
+  if(editingCompId){const c=S.comps.find(x=>x.id===editingCompId);if(c)Object.assign(c,data);editingCompId=null;}
+  else{data.id=Date.now();S.comps.push(data);}
+  save();clearCF();closeCF();rACList();rTmp();bCal();toast('✓ Competición guardada');
 }
-function delComp(id){S.comps=S.comps.filter(c=>c.id!==id);save();rACList();}
+function delComp(id){if(!confirm('¿Eliminar esta competición?'))return;S.comps=S.comps.filter(c=>c.id!==id);save();rACList();rTmp();bCal();}
 function rACList(){
   const el=document.getElementById('adm-comp-list');
-  el.innerHTML=S.comps.length? S.comps.slice().sort((a,b)=>(a.sem||99)-(b.sem||99)).map(c=>`<div class="ci"><div class="cin"><div class="ciname">${esc(c.name)}</div><div class="cimeta">${esc(c.mes)}${c.sem?' · sem '+c.sem:''}${c.tipo?' · '+esc(c.tipo):''} · ${esc(c.imp||'')}</div></div><div class="cias"><button class="btn btd" onclick="delComp(${c.id})">Eliminar</button></div></div>`).join('') : '<div style="color:var(--mu);font-family:var(--fm);font-size:12px">Sin competiciones.</div>';
+  el.innerHTML=S.comps.length? S.comps.slice().sort((a,b)=>(a.sem||99)-(b.sem||99)).map(c=>{
+    const dias=c.dia?(c.diaFin&&c.diaFin!==c.dia?` · días ${c.dia}–${c.diaFin}`:` · día ${c.dia}`):'';
+    return `<div class="ci"><div class="cin"><div class="ciname">${esc(c.name)}</div><div class="cimeta">${esc(c.mes)}${c.sem?' · sem '+c.sem:''}${dias}${c.tipo?' · '+esc(c.tipo):''} · ${esc(c.imp||'')}</div></div><div class="cias"><button class="btn bte" onclick="editComp(${c.id})">Editar</button><button class="btn btd" onclick="delComp(${c.id})">Eliminar</button></div></div>`;
+  }).join('') : '<div style="color:var(--mu);font-family:var(--fm);font-size:12px">Sin competiciones.</div>';
 }
 function resetAll(){if(!confirm('¿Restaurar el documento a valores por defecto? Se perderán los datos de este atleta.'))return;localStorage.removeItem(STORE_KEY);location.reload();}
 
