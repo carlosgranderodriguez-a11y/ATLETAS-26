@@ -259,9 +259,7 @@ body.athlete .coach-only{display:none!important}
         <option value="RC">RC — Realiz. + Comp.</option><option value="D">D — Descanso</option>
       </select>
     </div>
-    <div class="fg" style="margin-bottom:10px">
-      <div class="fg"><label style="color:#50c8f0">🏋️ CARGA (RPE)</label><input id="wk-rpe" type="number" step="0.1" min="1" max="10" placeholder="ej. 3.5"></div>
-    </div>
+    <div id="wk-cargas" style="margin-bottom:10px;display:flex;flex-direction:column;gap:8px"></div>
     <div class="fg" style="margin-bottom:14px"><label>COMENTARIO DEL DÍA</label><input id="wk-nota" placeholder="Sensaciones, observaciones, incidencias..."></div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button class="coach-only" onclick="clearDay()" style="font-family:var(--fm);font-size:11px;padding:6px 12px;border-radius:4px;background:rgba(240,80,80,.06);border:1px solid rgba(240,80,80,.25);color:var(--dg);cursor:pointer">Limpiar</button>
@@ -410,6 +408,15 @@ body.athlete .coach-only{display:none!important}
 
   <div class="div"></div>
   <div class="ads">
+    <div class="adst">Tipos de carga <button class="btn bta" style="font-size:11px;padding:5px 12px" onclick="addCargaTipo()">+ Añadir</button></div>
+    <div class="card">
+      <div class="ss" style="margin-bottom:10px">Define las cargas que registras para este atleta (Campo, Gym, Esgrima, Natación…). Pon nombre, <b>icono</b> y color a cada una. Con <b>Peso ×</b> y <b>Sumar al total</b> controlas cómo cuenta cada carga en el sumatorio Σ.</div>
+      <div id="cargatipos-body"></div>
+    </div>
+  </div>
+
+  <div class="div"></div>
+  <div class="ads">
     <div class="adst">Competiciones <button class="btn bta" style="font-size:11px;padding:5px 12px" onclick="openCF()">+ Añadir</button></div>
     <div class="iform" id="comp-form">
       <div class="iforamt">NUEVA COMPETICIÓN</div>
@@ -454,7 +461,7 @@ body.athlete .coach-only{display:none!important}
 
 </main>
 <div class="toast" id="toast"></div>
-<div id="ver-tag" style="position:fixed;bottom:6px;right:9px;font-family:var(--fm);font-size:9px;color:var(--mu);opacity:.55;z-index:60;pointer-events:none">v11 · Ene–Dic</div>
+<div id="ver-tag" style="position:fixed;bottom:6px;right:9px;font-family:var(--fm);font-size:9px;color:var(--mu);opacity:.55;z-index:60;pointer-events:none">v13 · Ene–Dic</div>
 <script>
 // ===== CONFIG =====
 const Q=new URLSearchParams(location.search);
@@ -494,13 +501,20 @@ function DEFAULT(){return{
   wellness:[],
   entreno:{activacion:[],principal:[],calma:[]},
   gymcoach:{url:''},
+  cargaTipos:[{id:'gym',nombre:'Gym',icono:'🏋️',color:'#50c8f0',peso:1,enTotal:true}],
   cfg:{script:'',csv:'',calY:2026,calM:0,pin:''}
 };}
+
+function normTipos(arr){
+  if(!Array.isArray(arr)||!arr.length)return [{id:'gym',nombre:'Gym',icono:'🏋️',color:'#50c8f0',peso:1,enTotal:true}];
+  return arr.map(t=>Object.assign({icono:'',color:'#50c8f0',peso:1,enTotal:true},t));
+}
 
 let S=load();
 S.cfg=Object.assign({script:'',csv:'',calY:2026,calM:0,pin:''},S.cfg||{});
 S.days=S.days||{};S.entreno=S.entreno||{activacion:[],principal:[],calma:[]};
 if(!Array.isArray(S.weeks))S.weeks=DEFAULT().weeks;
+S.cargaTipos=normTipos(S.cargaTipos);
 let wdraft={fat:3,fis:3,sue:3,ani:3};
 let entBlock='principal', editEx=null;
 let charts={};
@@ -538,6 +552,12 @@ function reRenderActive(){({res:rRes,cal:bCal,tmp:rTmp,wel:rWel,ent:rEnt,adm:rAd
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.opacity='1';clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',1700);}
 function esc(s){return(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function initials(n){return (n||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();}
+function uidT(){return 't'+Math.random().toString(36).slice(2,7);}
+function getLoad(dd,tipo,idx){if(dd&&dd.cargas&&dd.cargas[tipo.id]!=null)return dd.cargas[tipo.id];if(idx===0&&dd&&dd.rpe!=null)return dd.rpe;return null;}
+function abbr(n){return (n||'').slice(0,4);}
+function tipoLabel(t){return t.icono?t.icono:abbr(t.nombre);}
+function tipoTotal(tipo,idx){let s=0;const ds=S.days||{};for(const k in ds){const v=getLoad(ds[k],tipo,idx);if(v!=null)s+=parseFloat(v);}return Math.round(s*10)/10;}
+function seasonGrandTotal(){let s=0;S.cargaTipos.forEach((t,i)=>{if(t.enTotal!==false)s+=tipoTotal(t,i)*(t.peso==null?1:+t.peso);});return Math.round(s*10)/10;}
 function curWeek(){
   const now=new Date();
   const MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -651,7 +671,7 @@ function bCal(){
         const dd=S.days[dkey]||{};
         const fase=dd.fase||wd.fase||'';
         const pc=PH[fase]||'emp';
-        const showRpe=dd.rpe||(d===wl.s?wd.rpe:null);
+        const dLoads=S.cargaTipos.map((t,i)=>({t,v:getLoad(dd,t,i)})).filter(x=>x.v!=null);
         const comps=S.comps.filter(c=>{
           if(c.dia){const ini=+c.dia,fin=+(c.diaFin||c.dia);return c.mes===m.mes&&d>=Math.min(ini,fin)&&d<=Math.max(ini,fin);}
           return (c.sem===wl.n)&&d===mid&&(!c.mes||c.mes===m.mes);
@@ -661,21 +681,25 @@ function bCal(){
         h+=`<div class="cd ${pc}${hc?' hc':''}${isToday?' cd-today':''}" ${isToday?'id="cal-today"':''} onclick="openDay('${dkey}','${m.mes}',${d})" style="cursor:pointer">
           <div class="dn">${d}</div>
           <div class="dph" style="color:${PC[fase]||'var(--mu)'}">${esc(fase)}</div>
-          ${showRpe?`<div style="font-family:var(--fm);font-size:9px;color:rgba(80,200,240,.7)">🏋️ ${esc(showRpe)}</div>`:''}
+          ${dLoads.length?dLoads.map(x=>`<div style="font-family:var(--fm);font-size:9px;color:${esc(x.t.color)}">${esc(tipoLabel(x.t))} ${esc(x.v)}</div>`).join(''):''}
           ${dd.nota?`<div style="font-size:9px;margin-top:3px;color:var(--bl);line-height:1.3;word-break:break-word">${esc(dd.nota)}</div>`:''}
           ${comps.length?comps.map(c=>`<div class="dcmp" style="color:${esc(compColor(c))}">• ${esc(c.name)}</div>`).join(''):''}
         </div>`;
       }
       const used=off+(wl.e-wl.s+1);
       for(let i=used;i<7;i++)h+=`<div class="cd emp"></div>`;
-      const dys=[];for(let d=wl.s;d<=wl.e;d++){dys.push(S.days[m.mes.replace(' ','-')+'-'+d]||{});}
-      const fis=dys.map(x=>x.rpe).filter(v=>v!=null&&v!=='');
-      const tot=fis.length?Math.round(fis.reduce((a,b)=>a+parseFloat(b),0)*10)/10:null;
-      const avg=fis.length?Math.round(tot/fis.length*10)/10:null;
-      h+=`<div class="cd" style="min-width:90px;max-width:90px;background:rgba(255,255,255,.03);border-left:2px solid var(--bd);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 4px">
+      const sums=S.cargaTipos.map((t,i)=>{
+        let s=0,any=false;
+        for(let d=wl.s;d<=wl.e;d++){const dd2=S.days[m.mes.replace(' ','-')+'-'+d];const v=getLoad(dd2,t,i);if(v!=null){s+=parseFloat(v);any=true;}}
+        return {t,s:any?Math.round(s*10)/10:null};
+      });
+      const grand=Math.round(sums.reduce((a,x)=>a+((x.s!=null&&x.t.enTotal!==false)?x.s*(x.t.peso==null?1:+x.t.peso):0),0)*10)/10;
+      const shown=sums.filter(x=>x.s!=null);
+      const anySum=shown.length>0;
+      h+=`<div class="cd" style="min-width:90px;max-width:90px;background:rgba(255,255,255,.03);border-left:2px solid var(--bd);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 4px">
         <div style="font-family:var(--fm);font-size:8px;color:var(--mu);letter-spacing:.05em">CARGA</div>
-        <div style="font-size:13px;font-weight:700;color:var(--ac)">🏋️ ${tot!=null?tot:'—'}</div>
-        ${avg!=null?`<div style="font-family:var(--fm);font-size:9px;color:var(--mu)">media ${avg}</div>`:''}
+        ${anySum?shown.map(x=>`<div style="font-family:var(--fm);font-size:10px;font-weight:600;color:${esc(x.t.color)}">${esc(tipoLabel(x.t))} ${x.s}</div>`).join(''):'<div style="font-size:13px;font-weight:700;color:var(--mu)">—</div>'}
+        ${anySum&&shown.length>1?`<div style="font-family:var(--fm);font-size:11px;font-weight:700;color:var(--ac);border-top:1px solid var(--bd);margin-top:2px;padding-top:2px">Σ ${grand}</div>`:''}
       </div></div>`;
     });
     h+=`</div>`;
@@ -706,7 +730,10 @@ function openDay(dkey,mes,d){
   document.getElementById('wk-title').textContent=d+' · '+mes;
   document.getElementById('wk-sub').textContent='Semana '+(wk?wk.num:'—');
   document.getElementById('wk-fase').value=dd.fase||(wk?wk.fase:'')||'';
-  document.getElementById('wk-rpe').value=dd.rpe!=null?dd.rpe:'';
+  document.getElementById('wk-cargas').innerHTML=S.cargaTipos.map((t,i)=>{
+    const v=getLoad(dd,t,i);
+    return `<div class="fg"><label style="color:${esc(t.color)}">${t.icono?esc(t.icono)+' ':''}${esc(t.nombre)} · carga (RPE)</label><input class="wk-carga-in" data-tipo="${esc(t.id)}" type="number" step="0.1" min="1" max="10" value="${v!=null?esc(v):''}" placeholder="1–10"></div>`;
+  }).join('');
   document.getElementById('wk-nota').value=dd.nota||'';
   document.getElementById('wk-overlay').style.display='flex';
 }
@@ -714,12 +741,16 @@ function closeDay(){document.getElementById('wk-overlay').style.display='none';d
 function saveDay(){
   if(!dayEdit)return;if(!S.days)S.days={};
   const prev=S.days[dayEdit]||{};
-  const r=document.getElementById('wk-rpe').value;
   const nota=document.getElementById('wk-nota').value.trim();
+  const cargas={};
+  document.querySelectorAll('#wk-cargas .wk-carga-in').forEach(inp=>{
+    const v=inp.value;if(v!=='')cargas[inp.dataset.tipo]=+v;
+  });
   const o={};
   if(isCoach()){const fase=document.getElementById('wk-fase').value||'';if(fase)o.fase=fase;}
   else if(prev.fase){o.fase=prev.fase;}
-  if(r!=='')o.rpe=+r;if(nota)o.nota=nota;
+  if(Object.keys(cargas).length)o.cargas=cargas;
+  if(nota)o.nota=nota;
   if(Object.keys(o).length)S.days[dayEdit]=o;else delete S.days[dayEdit];
   save();closeDay();bCal();toast('✓ Guardado');
 }
@@ -846,6 +877,42 @@ function rAdm(){
   const ms=document.getElementById('cf-mes');if(ms)ms.innerHTML=calMeses().map(m=>`<option>${m}</option>`).join('');
   rPlan();
   rACList();
+  rCargaTipos();
+}
+function rCargaTipos(){
+  const el=document.getElementById('cargatipos-body');if(!el)return;
+  const inp='background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--tx);font-family:var(--fb);font-size:13px;padding:6px 8px';
+  el.innerHTML=S.cargaTipos.map((t,i)=>`<div style="border:1px solid var(--bd);border-radius:7px;padding:10px;margin-bottom:8px;background:var(--bg3)">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:9px">
+      <input data-ct-icon="${esc(t.id)}" value="${esc(t.icono||'')}" maxlength="2" placeholder="◦" title="Icono (emoji)" style="${inp};width:46px;text-align:center;font-size:18px">
+      <input data-ct-name="${esc(t.id)}" value="${esc(t.nombre)}" placeholder="Nombre de la carga" style="${inp};flex:1;min-width:0">
+      <input type="color" data-ct-color="${esc(t.id)}" value="${esc(t.color)}" title="Color" style="height:34px;width:42px;padding:2px;cursor:pointer;border:1px solid var(--bd);border-radius:6px;background:var(--bg2)">
+      <button class="btn btd" style="font-size:10px;padding:5px 9px" onclick="delCargaTipo('${esc(t.id)}')">Quitar</button>
+    </div>
+    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+      <label style="display:flex;align-items:center;gap:6px;font-family:var(--fm);font-size:11px;color:var(--mu)">Peso ×<input type="number" data-ct-peso="${esc(t.id)}" value="${t.peso==null?1:esc(t.peso)}" step="0.1" min="0" style="${inp};width:64px"></label>
+      <label style="display:flex;align-items:center;gap:6px;font-family:var(--fm);font-size:11px;color:var(--mu);cursor:pointer"><input type="checkbox" data-ct-total="${esc(t.id)}" ${t.enTotal!==false?'checked':''} style="cursor:pointer">Sumar al total Σ</label>
+      <span style="margin-left:auto;font-family:var(--fm);font-size:12px;font-weight:600;color:${esc(t.color)}">Σ temporada: ${tipoTotal(t,i)}</span>
+    </div>
+  </div>`).join('')+
+  `<div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:4px;padding-top:10px;border-top:1px solid var(--bd)">
+     <span style="font-family:var(--fm);font-size:11px;color:var(--mu)">TOTAL PONDERADO TEMPORADA</span>
+     <span style="font-family:var(--fh);font-size:20px;font-weight:800;color:var(--ac)">Σ ${seasonGrandTotal()}</span>
+   </div>`;
+}
+function addCargaTipo(){
+  const n=prompt('Nombre de la carga (ej. Campo, Esgrima, Natación, Gym…):','');
+  if(n==null)return;const nombre=n.trim();if(!nombre)return;
+  const cols=['#50c8f0','#f0a050','#50f090','#9050f0','#f05050','#30c0b0','#c8f050'];
+  const color=cols[S.cargaTipos.length%cols.length];
+  S.cargaTipos.push({id:uidT(),nombre:nombre,icono:'',color:color,peso:1,enTotal:true});
+  save();rCargaTipos();bCal();toast('✓ Carga añadida · ponle icono y peso');
+}
+function delCargaTipo(id){
+  if(S.cargaTipos.length<=1){toast('Debe quedar al menos un tipo de carga');return;}
+  if(!confirm('¿Quitar este tipo de carga? Los valores ya registrados de esta carga dejarán de mostrarse.'))return;
+  S.cargaTipos=S.cargaTipos.filter(t=>t.id!==id);
+  save();rCargaTipos();bCal();toast('Carga eliminada');
 }
 const FASE_OPTS=[['','—'],['A','A · Acumulación'],['A+','A+ · Acum. avanzada'],['A++','A++ · Acum. máxima'],['T','T · Transformación'],['R','R · Realización'],['C','C · Competición'],['RC','RC · Realiz.+Comp.'],['D','D · Descanso']];
 function faseOptions(sel){return FASE_OPTS.map(([v,l])=>`<option value="${v}" ${v===(sel||'')?'selected':''}>${l}</option>`).join('');}
@@ -963,6 +1030,18 @@ document.getElementById('plan-body').addEventListener('change',function(e){
   if(f){getWeek(+f).fase=e.target.value;save();bCal();rTmp();rRes();}
   else if(r){getWeek(+r).rpe=e.target.value===''?null:+e.target.value;save();}
 });
+document.getElementById('cargatipos-body').addEventListener('change',function(e){
+  const d=e.target.dataset;
+  const id=d.ctName||d.ctColor||d.ctIcon||d.ctPeso||d.ctTotal;
+  if(!id)return;
+  const t=S.cargaTipos.find(x=>x.id===id);if(!t)return;
+  if(d.ctName!=null)t.nombre=e.target.value.trim()||t.nombre;
+  else if(d.ctColor!=null)t.color=e.target.value;
+  else if(d.ctIcon!=null)t.icono=e.target.value.trim();
+  else if(d.ctPeso!=null)t.peso=e.target.value===''?1:+e.target.value;
+  else if(d.ctTotal!=null)t.enTotal=e.target.checked;
+  save();bCal();rCargaTipos();
+});
 
 function lockGate(){
   const p=S.perfil||{};
@@ -996,6 +1075,7 @@ if(gasUrl()){
       S.cfg=Object.assign({script:'',csv:'',calY:2026,calM:0,pin:''},S.cfg||{});
       S.days=S.days||{};S.entreno=S.entreno||{activacion:[],principal:[],calma:[]};
       if(!Array.isArray(S.weeks))S.weeks=DEFAULT().weeks;
+      S.cargaTipos=normTipos(S.cargaTipos);
       CAL=buildCAL(S.cfg.calY,S.cfg.calM);ensureWeeks();
       saveLocal();reRenderActive();
       setSync('✓ Cargado del Sheet · '+new Date().toLocaleTimeString().slice(0,5));
