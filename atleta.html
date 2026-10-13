@@ -180,6 +180,42 @@ body.athlete .coach-only{display:none!important}
 .pin-card input:focus{outline:none;border-color:var(--bl)}
 .pin-card button{width:100%;background:rgba(80,200,240,.12);border:1px solid rgba(80,200,240,.5);color:var(--bl);font-family:var(--fm);font-size:13px;padding:11px;border-radius:9px;cursor:pointer}
 .pin-card .pin-err{color:var(--dg);font-size:12px;font-family:var(--fm);min-height:16px;margin-top:8px}
+/* PARTIDOS (datos MC LAB) */
+.pt-meta{font-family:var(--fm);font-size:10px;letter-spacing:.08em;color:var(--mu);text-transform:uppercase;margin-bottom:14px}
+.pt-load{display:inline-flex;align-items:baseline;gap:8px;background:rgba(155,205,180,.12);color:#9BCDB4;border-radius:6px;padding:5px 11px;font-family:var(--fm)}
+.pt-load b{font-family:var(--fh);font-size:20px}
+.pt-mt{background:var(--bg3);border-radius:8px;padding:12px 14px}
+.pt-mt .l{font-family:var(--fm);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu)}
+.pt-mt .v{font-family:var(--fh);font-size:24px;font-weight:800;line-height:1;margin-top:7px}
+.pt-mt .v small{font-family:var(--fm);font-size:11px;font-weight:400;color:var(--mu)}
+.pt-bar{position:relative;height:4px;border-radius:2px;background:rgba(255,255,255,.08);margin-top:11px}
+.pt-bar i{display:block;height:4px;border-radius:2px;background:var(--fc)}
+.pt-bar u{position:absolute;left:80%;top:-3px;width:1px;height:10px;background:var(--tx);opacity:.5}
+.pt-mt .p{font-family:var(--fm);font-size:11px;font-weight:500;color:var(--fc);margin-top:7px}
+.pt-mt .d{font-family:var(--fm);font-size:10px;color:var(--mu);margin-top:4px}
+.pt-mt.ok{--fc:#9BCDB4}.pt-mt.warn{--fc:#E6CF9A}.pt-mt.bad{--fc:#E2A39A}
+.pt-hm{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pt-pill{font-family:var(--fm);font-size:12px;font-weight:500;color:#9BCDB4;background:rgba(155,205,180,.14);border-radius:5px;padding:4px 9px}
+.pt-bars,.pt-cbars{display:flex;align-items:flex-end;justify-content:center;gap:8px}
+.pt-bars{height:90px}.pt-cbars{height:104px;gap:6px}
+.pt-b{flex:1;max-width:54px;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%}
+.pt-b div{width:100%;border-radius:4px 4px 0 0;background:#41584F}
+.pt-b.last div{background:#9BCDB4}
+.pt-b span,.pt-b em{font-family:var(--fm);font-size:10px;color:var(--mu);font-style:normal;white-space:nowrap;overflow:hidden;max-width:100%}
+.pt-b.last span,.pt-b.last em{color:var(--tx);font-weight:500}
+.pt-seg{display:inline-flex;background:var(--bg3);border:1px solid var(--bd);border-radius:6px;padding:2px;gap:2px}
+.pt-seg button{font-family:var(--fm);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);padding:6px 11px;border-radius:4px;background:none;border:none;cursor:pointer}
+.pt-seg button.on{background:var(--ac);color:#0d0f14;font-weight:500}
+.pt-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.pt-note{font-size:12px;color:var(--mu);line-height:1.5;margin:10px 0 0}
+.pt-tw{overflow-x:auto;margin-top:14px}
+.pt-t{min-width:560px}
+.pt-t th,.pt-t td{text-align:right;white-space:nowrap}
+.pt-t th:nth-child(-n+2),.pt-t td:nth-child(-n+2){text-align:left}
+.pt-t td.rv{color:var(--mu)}
+.pt-t tr.cur td{color:var(--tx);font-weight:500}
+.pt-leg{font-size:11px;color:var(--mu);margin-top:14px;line-height:1.6}
+@media(max-width:680px){.pt-g4{grid-template-columns:repeat(2,minmax(0,1fr))!important}.pt-g3{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 </style>
 </head>
 <body>
@@ -201,6 +237,7 @@ body.athlete .coach-only{display:none!important}
     <div class="ntab" onclick="T('cal')">Calendario</div>
     <div class="ntab coach-only" onclick="T('tmp')">Temporada</div>
     <div class="ntab" onclick="T('wel')">Wellness</div>
+    <div class="ntab" id="tab-par" onclick="T('par')" style="display:none">Partidos</div>
     <div class="ntab" onclick="T('ent')" style="color:var(--bl)">⊕ Entrenamiento</div>
     <div class="ntab adm coach-only" onclick="T('adm')">⚙ Gestión</div>
   </div>
@@ -313,6 +350,11 @@ body.athlete .coach-only{display:none!important}
 </div>
 
 <!-- ENTRENAMIENTO -->
+<!-- PARTIDOS -->
+<div id="pnl-par" class="pnl">
+  <div id="par-body"></div>
+</div>
+
 <div id="pnl-ent" class="pnl">
   <div class="st">Entrenamiento</div>
   <div class="ss">Descripción de los ejercicios de la sesión · enlazado con GymCoach Pro</div>
@@ -462,6 +504,7 @@ body.athlete .coach-only{display:none!important}
 </main>
 <div class="toast" id="toast"></div>
 <div id="ver-tag" style="position:fixed;bottom:6px;right:9px;font-family:var(--fm);font-size:9px;color:var(--mu);opacity:.55;z-index:60;pointer-events:none">v13 · Ene–Dic</div>
+<script src="partidos.js"></script>
 <script>
 // ===== CONFIG =====
 const Q=new URLSearchParams(location.search);
@@ -548,7 +591,7 @@ function sheetLoad(cb){
   document.body.appendChild(s);
 }
 function activeTab(){const p=document.querySelector('.pnl.on');return p?p.id.replace('pnl-',''):'res';}
-function reRenderActive(){({res:rRes,cal:bCal,tmp:rTmp,wel:rWel,ent:rEnt,adm:rAdm}[activeTab()]||rRes)();}
+function reRenderActive(){({res:rRes,cal:bCal,tmp:rTmp,wel:rWel,ent:rEnt,par:rPar,adm:rAdm}[activeTab()]||rRes)();}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.opacity='1';clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',1700);}
 function esc(s){return(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function initials(n){return (n||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();}
@@ -569,6 +612,94 @@ function curWeek(){
 }
 
 // ===== TAB ROUTER =====
+// ===== PARTIDOS (datos MC LAB) · datos en partidos.js =====
+const PAR_METS=[
+  {k:'dt',l:'Distancia total',u:'m'},
+  {k:'hsr',l:'Alta intensidad (HSR)',u:'m'},
+  {k:'v28',l:'Distancia >28 km/h',u:'m'},
+  {k:'acc',l:'Aceleraciones',u:''},
+  {k:'sprint',l:'Sprint',u:'m'},
+  {k:'esf28',l:'Esfuerzos >28',u:''},
+  {k:'dec',l:'Deceleraciones',u:''},
+  {k:'vmax',l:'Velocidad máx.',u:'km/h',d:1}
+];
+const PAR_GRAF=['dt','hsr','sprint','vmax','acc','dec'];
+let PAR_R='5';
+function parData(){return (window.PARTIDOS&&window.PARTIDOS[DOC_ID])||null;}
+function parHas(){const d=parData();return !!(d&&d.partidos&&d.partidos.length);}
+function parDef(k){return PAR_METS.find(m=>m.k===k)||{k:k,l:k,u:''};}
+function parFmt(v,d){d=d||0;const s=Number(v).toFixed(d);let [i,f]=s.split('.');if(i.length>=5)i=i.replace(/\B(?=(\d{3})+(?!\d))/g,'.');return f?i+','+f:i;}
+function parRango(r){PAR_R=r;rPar();}
+function parTile(p,prev,m){
+  const x=p.m[m.k];if(!x)return '';
+  let dl='';const y=prev&&prev.m[m.k];
+  if(y&&y.v){const r=Math.round((x.v-y.v)/y.v*100);dl=`<div class="d">${r>0?'▲ +':r<0?'▼ ':'■ '}${r}% vs ${esc(prev.jornada)}</div>`;}
+  return `<div class="pt-mt ${x.st}"><div class="l">${esc(m.l)}</div>
+    <div class="v">${parFmt(x.v,m.d)}${m.u?' <small>'+esc(m.u)+'</small>':''}</div>
+    <div class="pt-bar"><i style="width:${Math.min(100,x.p/125*100).toFixed(1)}%"></i><u></u></div>
+    <div class="p">${x.p}% POC</div>${dl}</div>`;
+}
+function parChart(list,k){
+  const m=parDef(k);
+  const mx=Math.max(...list.map(p=>p.m[k]?p.m[k].v:0),0)||1;
+  const n=list.length,lab=n<=8;
+  const bars=list.map((p,i)=>{
+    const x=p.m[k],last=i===n-1;
+    if(!x)return `<div class="pt-b"><div style="height:3px;opacity:.35"></div><span>${esc(p.jornada)}</span></div>`;
+    return `<div class="pt-b${last?' last':''}" title="${esc(p.jornada)} · ${parFmt(x.v,m.d)} ${esc(m.u)}">${lab?`<em>${parFmt(x.v,m.d)}</em>`:''}<div style="height:${Math.max(3,Math.round(x.v/mx*62))}px"></div><span>${esc(p.jornada)}</span></div>`;
+  }).join('');
+  return `<div class="card card-sm"><div class="ct" style="margin-bottom:8px">${esc(m.l)}${m.u?' · '+esc(m.u):''}</div><div class="pt-cbars">${bars}</div></div>`;
+}
+function parTable(list){
+  const cols=['dt','hsr','sprint','vmax','acc','dec'];
+  const nom={dt:'DIST.',hsr:'HSR',sprint:'SPRINT',vmax:'V. MÁX',acc:'ACEL.',dec:'DECEL.'};
+  const head=cols.map(k=>`<th>${nom[k]}</th>`).join('');
+  const rows=list.slice().reverse().map((p,i)=>`<tr${i===0?' class="cur"':''}><td>${esc(p.jornada)}</td><td class="rv">${esc(p.partido)}</td><td>${p.min}′</td>${cols.map(k=>`<td>${p.m[k]?parFmt(p.m[k].v,parDef(k).d):'—'}</td>`).join('')}</tr>`).join('');
+  return `<div class="pt-tw"><table class="pt-t"><thead><tr><th>JOR.</th><th>PARTIDO</th><th>MIN</th>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function rPar(){
+  const el=document.getElementById('par-body');if(!el)return;
+  if(!parHas()){el.innerHTML='<div class="card"><div class="ct">Partidos</div><div class="ss" style="margin:0">Todavía no hay datos de partido cargados para este atleta.</div></div>';return;}
+  const d=parData(),todos=d.partidos;
+  const p=todos[todos.length-1],prev=todos[todos.length-2];
+  const todo=PAR_R==='all';
+  const lista=todo?todos:todos.slice(-5);
+  const hm=p.m.hmld;
+  const seq=(d.minutosPrevios||[]).map(m=>({min:m})).concat(todos.map(x=>({min:x.min})));
+  const mseq=todo?seq:seq.slice(-5);
+  const maxM=Math.max(...mseq.map(x=>x.min),1);
+  const mbars=mseq.map((x,i)=>`<div class="pt-b${i===mseq.length-1?' last':''}"><div style="height:${Math.round(x.min/maxM*60)}px"></div><span>${x.min}′</span></div>`).join('');
+  const titulo=todo?`histórico completo · ${todos.length} ${todos.length===1?'partido':'partidos'}`:`últimos ${lista.length} ${lista.length===1?'partido':'partidos'}`;
+  el.innerHTML=`
+    <div class="pt-hd">
+      <div><div class="st" style="margin-bottom:2px">Último partido</div>
+        <div class="pt-meta" style="margin:0">${esc(p.jornada)} · ${esc(p.partido)} · ${esc(p.fecha)} · % respecto al POC</div></div>
+      <div class="pt-load"><b>${p.min}′</b><span>${esc(p.carga||'')}</span></div>
+    </div>
+    <div class="g4 pt-g4">${PAR_METS.map(m=>parTile(p,prev,m)).join('')}</div>
+    <div class="g2">
+      <div class="card"><div class="ct">HMLD · distancia de alta demanda metabólica</div>
+        <div class="pt-hm"><div class="mv" style="margin:0">${hm?parFmt(hm.v):'—'} <span style="font-family:var(--fm);font-size:12px;font-weight:400;color:var(--mu)">m</span></div>${hm?`<span class="pt-pill">${hm.p}%</span>`:''}</div></div>
+      <div class="card"><div class="ct">Minutos · ${todo?'todos los partidos':'últimos '+mseq.length+' partidos'}</div><div class="pt-bars">${mbars}</div></div>
+    </div>
+    <div class="pt-hd" style="margin-top:6px">
+      <div><div class="st" style="margin-bottom:2px">Evolución</div><div class="pt-meta" style="margin:0">${titulo}</div></div>
+      <div class="pt-seg" role="group" aria-label="Rango del histórico">
+        <button class="${todo?'':'on'}" onclick="parRango('5')">Últimos 5</button>
+        <button class="${todo?'on':''}" onclick="parRango('all')">Histórico (${todos.length})</button>
+      </div>
+    </div>
+    <div class="g3 pt-g3">${PAR_GRAF.map(k=>parChart(lista,k)).join('')}</div>
+    ${todos.length===1?'<div class="pt-note">De momento solo hay un partido cargado. Con cada partido nuevo se irá dibujando la evolución y las variaciones respecto al anterior.</div>':''}
+    <div class="card" style="margin-top:6px"><div class="ct">Partidos</div>${parTable(lista)}</div>
+    <div class="pt-leg">Colores según el informe MC LAB: verde, dentro del objetivo · ámbar, por debajo · rosa, por encima o carga baja en el partido. La línea vertical de cada barra marca el 100%.</div>`;
+}
+function parInit(){
+  const t=document.getElementById('tab-par');
+  if(t&&parHas()){t.style.display='flex';
+    if((Q.get('tab')||'').toLowerCase()==='partidos')T('par');}
+}
+
 function T(id){
   if(!isCoach()&&(id==='adm'||id==='tmp'))id='res';
   document.querySelectorAll('.pnl').forEach(p=>p.classList.remove('on'));
@@ -580,6 +711,7 @@ function T(id){
   if(id==='tmp')rTmp();
   if(id==='wel')rWel();
   if(id==='ent')rEnt();
+  if(id==='par')rPar();
   if(id==='adm')rAdm();
   window.scrollTo(0,0);
 }
@@ -1066,6 +1198,7 @@ if(!isCoach()){document.body.classList.add('athlete');
   document.getElementById('pin-gate').style.display='flex';
   document.getElementById('pin-msg').textContent='Cargando…';}
 rRes();
+parInit();
 // Carga desde el Sheet al abrir (fuente compartida entre dispositivos)
 if(gasUrl()){
   setSync('↺ Cargando del Sheet…');
