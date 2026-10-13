@@ -59,6 +59,79 @@
   .editlink:hover{color:var(--text);background:var(--line-soft)}
   .url-preview{font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 
+  /* Ficha con panel de métricas (atletas con datos de partido) */
+  .ov{position:fixed;inset:0;background:rgba(5,7,10,.72);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:36px 16px;overflow:auto}
+  .feat{position:relative;width:100%;max-width:860px;background:var(--surface);border:1px solid var(--line);border-radius:var(--rad);padding:22px 24px 22px 26px;display:flex;flex-direction:column;gap:16px;overflow:hidden}
+  .feat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c)}
+  .xbtn{font-size:13px;line-height:1;color:var(--text-dim);padding:7px 11px;border-radius:8px}
+  .xbtn:hover{color:var(--text);background:var(--line-soft)}
+  .feat-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .feat-id{display:flex;align-items:center;gap:14px}
+  .feat-av{width:52px;height:52px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;flex:none}
+  .feat .name{font-size:30px}
+  .feat-load{display:flex;align-items:center;gap:10px;background:rgba(63,184,122,.14);border-radius:10px;padding:8px 14px;color:#3FB87A}
+  .feat-load b{font-family:var(--mono);font-size:22px;line-height:1}
+  .feat-load span{font-size:11px;text-transform:uppercase;letter-spacing:.1em}
+  .feat-meta{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-dim);text-transform:uppercase}
+  .mgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .mt{background:var(--surface-2);border-radius:10px;padding:12px 14px}
+  .mt .ml{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em}
+  .mt .mv{font-family:var(--mono);font-weight:700;font-size:22px;line-height:1;margin-top:8px}
+  .mt .mv small{font-size:12px;color:var(--text-dim);font-weight:400}
+  .mbar{position:relative;height:4px;border-radius:2px;background:var(--line);margin-top:12px}
+  .mbar i{display:block;height:4px;border-radius:2px;background:var(--fc)}
+  .mbar u{position:absolute;left:80%;top:-3px;width:1px;height:10px;background:var(--text);opacity:.6}
+  .mt .mp{font-family:var(--mono);font-weight:700;font-size:11px;color:var(--tc);margin-top:7px}
+  .mt.ok{--fc:#3FB87A;--tc:#3FB87A}.mt.warn{--fc:#F5A623;--tc:#F5A623}.mt.bad{--fc:#E5022C;--tc:#FF6B7F}
+  .feat-bottom{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:10px}
+  .hm{background:var(--surface-2);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;justify-content:space-between;gap:12px}
+  .hm .ml{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em}
+  .hm .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .hm .big{font-family:var(--mono);font-weight:700;font-size:28px;line-height:1}
+  .hm .big small{font-size:13px;color:var(--text-dim);font-weight:400}
+  .pill{font-family:var(--mono);font-weight:700;font-size:13px;color:#3FB87A;background:rgba(63,184,122,.14);border-radius:6px;padding:5px 10px}
+  .mins{background:var(--surface-2);border-radius:10px;padding:14px 16px}
+  .mins .ml{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em}
+  .mins .bars{display:flex;align-items:flex-end;gap:14px;height:82px;margin-top:10px}
+  .mins .b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%}
+  .mins .b div{width:100%;border-radius:4px 4px 0 0;background:#3A4352}
+  .mins .b span{font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+  .mins .b.last div{background:var(--c)}
+  .mins .b.last span{color:var(--text);font-weight:700}
+  .mt .md{font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:5px}
+
+  /* Histórico / evolución */
+  .hist{border-top:1px solid var(--line-soft);padding-top:16px;display:flex;flex-direction:column;gap:14px}
+  .hist-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .hist-t{font-family:var(--display);font-weight:700;font-size:21px;letter-spacing:.04em;text-transform:uppercase;line-height:1}
+  .hist-s{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-dim);text-transform:uppercase;margin-top:5px}
+  .seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+  .seg button{font-size:12px;font-weight:500;color:var(--text-dim);padding:7px 12px;border-radius:7px;line-height:1}
+  .seg button:hover{color:var(--text)}
+  .seg button.on{background:var(--c);color:#fff}
+  .cgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .ch{background:var(--surface-2);border-radius:10px;padding:12px 14px}
+  .ch .ml{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em}
+  .cbars{display:flex;align-items:flex-end;justify-content:center;gap:6px;height:104px;margin-top:10px}
+  .cb{flex:1;max-width:54px;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%}
+  .cb em{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--text-dim);white-space:nowrap}
+  .cb .cv{width:100%;border-radius:4px 4px 0 0;background:#3A4352}
+  .cb .cl{font-family:var(--mono);font-size:9.5px;color:var(--text-dim);white-space:nowrap;overflow:hidden;max-width:100%}
+  .cb.last .cv{background:var(--c)}
+  .cb.last em,.cb.last .cl{color:var(--text);font-weight:700}
+  .hist-note{font-size:12px;color:var(--text-dim);line-height:1.5}
+  .tw{overflow-x:auto;border:1px solid var(--line-soft);border-radius:10px}
+  .ht{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11.5px;min-width:560px}
+  .ht th{text-align:right;font-weight:500;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);padding:9px 10px;border-bottom:1px solid var(--line-soft);background:var(--surface-2);white-space:nowrap}
+  .ht td{text-align:right;padding:9px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap}
+  .ht tr:last-child td{border-bottom:none}
+  .ht th:nth-child(1),.ht th:nth-child(2),.ht td:nth-child(1),.ht td.rv{text-align:left}
+  .ht td.rv{font-family:var(--body);color:var(--text-dim)}
+  .ht tr.cur td{color:var(--text);font-weight:700}
+  .ht tr.cur td:first-child{box-shadow:inset 3px 0 0 var(--c)}
+  @media(max-width:680px){.mgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.feat-bottom{grid-template-columns:1fr}.feat .name{font-size:26px}.cgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:420px){.cgrid{grid-template-columns:1fr}}
+
   .addcard{border:1px dashed var(--line);background:transparent;border-radius:var(--rad);min-height:124px;display:flex;align-items:center;justify-content:center;gap:9px;color:var(--text-faint);font-weight:500;transition:all .14s ease;width:100%}
   .addcard:hover{border-color:var(--text-dim);color:var(--text-dim);background:var(--surface)}
   .addcard .plus{font-size:20px;line-height:1}
@@ -97,6 +170,25 @@ const SEED=[
   {id:'alicia',nombre:'Alicia',disciplina:'readaptacion',sub:'Rodilla / cadera',estado:'readapt',url:''},
   {id:'villegas',nombre:'Marco Villegas',disciplina:'futbol',sub:'Futbolista',estado:'disponible',url:''},
   {id:'chypi',nombre:'Chiprian Pérez',disciplina:'futbol',sub:'Chypi · Futbolista',estado:'disponible',url:''},
+  {id:'diego-aguado',nombre:'Diego Aguado Facio',disciplina:'futbol',sub:'Defensa Central · RM Castilla',estado:'disponible',url:'',
+    // Minutos de partidos anteriores al histórico (solo se conocen los minutos)
+    minutosPrevios:[65,102,99,82],
+    // HISTÓRICO: añade un objeto por partido, el más reciente al final.
+    // m.<clave> = {v: valor, p: % respecto al POC, st: ok|warn|bad}
+    partidos:[
+      {id:'j07',jornada:'J07',partido:'UD Ibiza – RM Castilla',fecha:'viernes 9 oct 2026',min:96,carga:'Alta',
+        m:{
+          dt:{v:10891,p:101,st:'ok'},
+          hsr:{v:598,p:81,st:'bad'},
+          v28:{v:59,p:56,st:'bad'},
+          acc:{v:35,p:117,st:'ok'},
+          sprint:{v:234,p:63,st:'bad'},
+          esf28:{v:5,p:71,st:'bad'},
+          dec:{v:59,p:109,st:'ok'},
+          vmax:{v:31.4,p:95,st:'warn'},
+          hmld:{v:3288,p:96,st:'ok'}
+        }}
+    ]},
   {id:'mateos',nombre:'Marco Mateos',disciplina:'esgrima',sub:'Esgrimista',estado:'disponible',url:''},
   {id:'comesana',nombre:'Javi Comesaña',disciplina:'multideporte',sub:'Multideporte',estado:'disponible',url:''},
   {id:'villaescusa',nombre:'Nacho Villaescusa',disciplina:'multideporte',sub:'Sancho · Readaptación',estado:'readapt',url:''},
@@ -111,16 +203,119 @@ function load(){
   if(!saved)return JSON.parse(JSON.stringify(SEED));
   const ids=new Set(saved.map(a=>a.id));
   SEED.forEach(s=>{if(!ids.has(s.id))saved.push(JSON.parse(JSON.stringify(s)));});
+  // Los partidos viven en el código (SEED): siempre mandan sobre lo guardado en el navegador
+  SEED.forEach(s=>{if(!s.partidos)return;const sv=saved.find(a=>a.id===s.id);if(!sv)return;
+    sv.partidos=JSON.parse(JSON.stringify(s.partidos));sv.minutosPrevios=(s.minutosPrevios||[]).slice();delete sv.partido;});
   return saved;
 }
 let saveTimer=null;
 function save(){if(store.ok){try{localStorage.setItem(STORE_KEY,JSON.stringify(state.athletes));flash('Guardado');return;}catch(e){}}flash('Modo demo · descarga el archivo para guardar',true);}
 function flash(msg,warn){const el=document.getElementById('savetag');el.textContent=msg;el.classList.toggle('warn',!!warn);el.classList.add('show');clearTimeout(saveTimer);saveTimer=setTimeout(()=>el.classList.remove('show'),1800);}
 
-let state={athletes:load()};
+let state={athletes:load(),open:null,rango:'5'};
 function esc(s){return(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function uid(){return 'a'+Math.random().toString(36).slice(2,8);}
 function shortUrl(u){return u.replace(/^https?:\/\//,'').replace(/\/$/,'');}
+
+function iniciales(n){return String(n||'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();}
+
+/* ---------- Ficha con histórico (atletas con partidos[]) ---------- */
+const METS=[
+  {k:'dt',l:'Distancia total',u:'m'},
+  {k:'hsr',l:'Alta intensidad (HSR)',u:'m'},
+  {k:'v28',l:'Distancia >28 km/h',u:'m'},
+  {k:'acc',l:'Aceleraciones',u:''},
+  {k:'sprint',l:'Sprint',u:'m'},
+  {k:'esf28',l:'Esfuerzos >28',u:''},
+  {k:'dec',l:'Deceleraciones',u:''},
+  {k:'vmax',l:'Velocidad máx.',u:'km/h',d:1}
+];
+const GRAF=['dt','hsr','sprint','vmax','acc','dec']; // métricas con gráfico de evolución
+function metDef(k){return METS.find(m=>m.k===k);}
+function fmt(v,d){d=d||0;const s=Number(v).toFixed(d);let [i,f]=s.split('.');if(i.length>=5)i=i.replace(/\B(?=(\d{3})+(?!\d))/g,'.');return f?i+','+f:i;}
+function tienePartidos(a){return !!(a&&a.partidos&&a.partidos.length);}
+
+function tile(p,prev,m){
+  const x=p.m[m.k];if(!x)return '';
+  let dl='';
+  const y=prev&&prev.m[m.k];
+  if(y&&y.v){const r=Math.round((x.v-y.v)/y.v*100);dl=`<div class="md">${r>0?'▲ +':r<0?'▼ ':'■ '}${r}% vs ${esc(prev.jornada)}</div>`;}
+  return `<div class="mt ${x.st}">
+      <div class="ml">${esc(m.l)}</div>
+      <div class="mv">${fmt(x.v,m.d)}${m.u?' <small>'+esc(m.u)+'</small>':''}</div>
+      <div class="mbar"><i style="width:${Math.min(100,x.p/125*100).toFixed(1)}%"></i><u></u></div>
+      <div class="mp">${x.p}% POC</div>${dl}</div>`;
+}
+
+function chart(list,k){
+  const m=metDef(k);
+  const vals=list.map(p=>p.m[k]?p.m[k].v:0);
+  const mx=Math.max(...vals,0)||1;
+  const n=list.length,lab=n<=8;
+  const bars=list.map((p,i)=>{
+    const x=p.m[k],last=i===n-1;
+    if(!x)return `<div class="cb"><div class="cv" style="height:3px;opacity:.35"></div><span class="cl">${esc(p.jornada)}</span></div>`;
+    return `<div class="cb${last?' last':''}" title="${esc(p.jornada)} · ${fmt(x.v,m.d)} ${esc(m.u)}">${lab?`<em>${fmt(x.v,m.d)}</em>`:''}<div class="cv" style="height:${Math.max(3,Math.round(x.v/mx*62))}px"></div><span class="cl">${esc(p.jornada)}</span></div>`;
+  }).join('');
+  return `<div class="ch"><div class="ml">${esc(m.l)}${m.u?' · '+esc(m.u):''}</div><div class="cbars">${bars}</div></div>`;
+}
+
+function histTable(list){
+  const cols=['dt','hsr','sprint','vmax','acc','dec'];
+  const head=cols.map(k=>`<th>${esc(metDef(k).l.replace('Distancia total','Dist.').replace('Alta intensidad (HSR)','HSR').replace('Velocidad máx.','V. máx').replace('Aceleraciones','Acel.').replace('Deceleraciones','Decel.'))}</th>`).join('');
+  const rows=list.slice().reverse().map((p,i)=>`<tr${i===0?' class="cur"':''}><td>${esc(p.jornada)}</td><td class="rv">${esc(p.partido)}</td><td>${p.min}′</td>${cols.map(k=>`<td>${p.m[k]?fmt(p.m[k].v,metDef(k).d):'—'}</td>`).join('')}</tr>`).join('');
+  return `<div class="tw"><table class="ht"><thead><tr><th>Jor.</th><th>Partido</th><th>Min</th>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function featCard(a,d,s){
+  const todos=a.partidos,has=!!a.url;
+  const p=todos[todos.length-1],prev=todos[todos.length-2];
+  const todo=state.rango==='all';
+  const lista=todo?todos:todos.slice(-5);
+  const mt=METS.map(m=>tile(p,prev,m)).join('');
+  const hm=p.m.hmld;
+  // minutos: partidos previos al histórico (solo minutos) + partidos cargados
+  const seq=(a.minutosPrevios||[]).map(m=>({min:m})).concat(todos.map(x=>({min:x.min})));
+  const mseq=todo?seq:seq.slice(-5);
+  const maxM=Math.max(...mseq.map(x=>x.min),1);
+  const bars=mseq.map((x,i)=>`<div class="b${i===mseq.length-1?' last':''}"><div style="height:${Math.round(x.min/maxM*60)}px"></div><span>${x.min}′</span></div>`).join('');
+  const charts=GRAF.map(k=>chart(lista,k)).join('');
+  const titulo=todo?`histórico completo · ${todos.length} ${todos.length===1?'partido':'partidos'}`:`últimos ${lista.length} ${lista.length===1?'partido':'partidos'}`;
+  return `<div class="ov" data-close="1"><div class="feat" role="dialog" aria-modal="true" aria-label="Datos de ${esc(a.nombre)}" style="--c:${d.color};--s:${s}">
+    <div class="feat-head">
+      <div class="feat-id">
+        <div class="feat-av">${esc(iniciales(a.nombre))}</div>
+        <div><div class="name">${esc(a.nombre)}</div><div class="sub">${esc(a.sub||d.label)}</div></div>
+      </div>
+      <div class="feat-load"><b>${p.min}′</b><span>${esc(p.carga)}</span></div>
+    </div>
+    <div class="feat-meta">Último partido · ${esc(p.jornada)} · ${esc(p.partido)} · ${esc(p.fecha)} · % respecto al POC</div>
+    <div class="mgrid">${mt}</div>
+    <div class="feat-bottom">
+      <div class="hm"><div class="ml">HMLD · distancia de alta demanda metabólica</div>
+        <div class="row"><div class="big">${hm?fmt(hm.v):'—'} <small>m</small></div>${hm?`<span class="pill">${hm.p}%</span>`:''}</div></div>
+      <div class="mins"><div class="ml">Minutos · ${mseq.length===seq.length&&todo?'todos los partidos':'últimos '+mseq.length+' partidos'}</div><div class="bars">${bars}</div></div>
+    </div>
+
+    <div class="hist">
+      <div class="hist-head">
+        <div><div class="hist-t">Evolución</div><div class="hist-s">${titulo}</div></div>
+        <div class="seg" role="group" aria-label="Rango del histórico">
+          <button data-rango="5" class="${todo?'':'on'}">Últimos 5</button>
+          <button data-rango="all" class="${todo?'on':''}">Histórico (${todos.length})</button>
+        </div>
+      </div>
+      <div class="cgrid">${charts}</div>
+      ${todos.length===1?'<div class="hist-note">De momento solo hay un partido cargado. Con cada partido nuevo se irá dibujando la evolución y las variaciones respecto al anterior.</div>':''}
+      ${histTable(lista)}
+    </div>
+
+    <div class="card-foot" style="margin-top:0">
+      <button class="go linked" data-opendoc="${a.id}" style="color:var(--c)">Abrir ${has?'enlace ↗':'documento ↗'}</button>
+      <button class="xbtn" data-close="1">Cerrar ✕</button>
+    </div>
+  </div></div>`;
+}
 
 function render(){
   const ath=state.athletes;
@@ -149,9 +344,9 @@ function render(){
           <div><div class="name">${esc(a.nombre)}</div><div class="sub">${esc(a.sub||d.label)}</div></div>
           <span class="dot" style="background:${s};--s:${s}"></span>
         </div>
-        <div class="url-preview">${has?'↗ '+esc(shortUrl(a.url)):'→ documento del atleta'}</div>
+        <div class="url-preview">${tienePartidos(a)?'→ '+esc(a.partidos[a.partidos.length-1].jornada)+' · '+esc(a.partidos[a.partidos.length-1].partido):(has?'↗ '+esc(shortUrl(a.url)):'→ documento del atleta')}</div>
         <div class="card-foot">
-          <span class="go linked">Abrir ${has?'enlace ↗':'documento ↗'}</span>
+          <span class="go linked">${tienePartidos(a)?'Ver datos ↗':'Abrir '+(has?'enlace ↗':'documento ↗')}</span>
           <button class="editlink" data-editurl="${a.id}" title="Enlace externo (opcional)">✎</button>
         </div>
       </div>`;
@@ -164,6 +359,7 @@ function render(){
   </div></section>
   <p class="hint">Pincha una tarjeta para abrir el <b>documento del atleta</b>. Usa <b>✎</b> solo si quieres apuntar a un dashboard externo propio.</p>`;
 
+  if(state.open){const oa=ath.find(x=>x.id===state.open);if(tienePartidos(oa))html+=featCard(oa,DISC[oa.disciplina],ESTADO[oa.estado]||ESTADO.disponible);}
   document.getElementById('app').innerHTML=html;
 }
 
@@ -175,16 +371,25 @@ function setUrl(a){
   a.url=v.trim();save();render();
 }
 function openPage(a){const link=a.url||docLink(a);location.href=link;}
+function openCard(a){if(tienePartidos(a)){state.open=a.id;render();}else openPage(a);}
+function setRango(r){const o=document.querySelector('.ov');const t=o?o.scrollTop:0;state.rango=r;render();const n=document.querySelector('.ov');if(n)n.scrollTop=t;}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.open){state.open=null;render();}});
 
 document.getElementById('app').addEventListener('click',e=>{
   const ed=e.target.closest('[data-editurl]');
   if(ed){const a=state.athletes.find(x=>x.id===ed.dataset.editurl);return setUrl(a);}
+  const rg=e.target.closest('[data-rango]');
+  if(rg)return setRango(rg.dataset.rango);
+  const od=e.target.closest('[data-opendoc]');
+  if(od){const a=state.athletes.find(x=>x.id===od.dataset.opendoc);return openPage(a);}
+  const cl=e.target.closest('[data-close]');
+  if(cl&&(cl.classList.contains('xbtn')||e.target===cl)){state.open=null;return render();}
   const go=e.target.closest('[data-go]');
-  if(go){const a=state.athletes.find(x=>x.id===go.dataset.go);return openPage(a);}
+  if(go){const a=state.athletes.find(x=>x.id===go.dataset.go);return openCard(a);}
   if(e.target.closest('[data-add]'))return addAthlete();
 });
 document.getElementById('app').addEventListener('keydown',e=>{
-  if((e.key==='Enter'||e.key===' ')&&e.target.dataset.go){e.preventDefault();const a=state.athletes.find(x=>x.id===e.target.dataset.go);openPage(a);}
+  if((e.key==='Enter'||e.key===' ')&&e.target.dataset.go){e.preventDefault();const a=state.athletes.find(x=>x.id===e.target.dataset.go);openCard(a);}
 });
 
 function addAthlete(){
