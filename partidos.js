@@ -27,8 +27,8 @@ window.PARTIDOS={
           vmax:{v:31.4,p:95,st:'warn'},
           hmld:{v:3288,p:96,st:'ok'}
         }},
-      // J08: solo Informe general (sin % POC ni sprint/acel./decel./HMLD; rival no indicado en el PDF)
-      {id:'j08',jornada:'J08',partido:'',fecha:'domingo 18 oct 2026',min:99,carga:'',
+      // J08: solo Informe general (sin % POC ni sprint/acel./decel./HMLD): completar con el Match Day Report
+      {id:'j08',jornada:'J08',partido:'Antequera',fecha:'domingo 18 oct 2026',min:99,carga:'',
         m:{
           dt:{v:10621},
           hsr:{v:661},
