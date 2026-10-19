@@ -193,7 +193,7 @@ body.athlete .coach-only{display:none!important}
 .pt-bar u{position:absolute;left:80%;top:-3px;width:1px;height:10px;background:var(--tx);opacity:.5}
 .pt-mt .p{font-family:var(--fm);font-size:11px;font-weight:500;color:var(--fc);margin-top:7px}
 .pt-mt .d{font-family:var(--fm);font-size:10px;color:var(--mu);margin-top:4px}
-.pt-mt.ok{--fc:#9BCDB4}.pt-mt.warn{--fc:#E6CF9A}.pt-mt.bad{--fc:#E2A39A}
+.pt-mt.ok{--fc:#9BCDB4}.pt-mt.warn{--fc:#E6CF9A}.pt-mt.bad{--fc:#E2A39A}.pt-mt.nop{--fc:var(--mu)}
 .pt-hm{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .pt-pill{font-family:var(--fm);font-size:12px;font-weight:500;color:#9BCDB4;background:rgba(155,205,180,.14);border-radius:5px;padding:4px 9px}
 .pt-bars,.pt-cbars{display:flex;align-items:flex-end;justify-content:center;gap:8px}
@@ -631,13 +631,13 @@ function parDef(k){return PAR_METS.find(m=>m.k===k)||{k:k,l:k,u:''};}
 function parFmt(v,d){d=d||0;const s=Number(v).toFixed(d);let [i,f]=s.split('.');if(i.length>=5)i=i.replace(/\B(?=(\d{3})+(?!\d))/g,'.');return f?i+','+f:i;}
 function parRango(r){PAR_R=r;rPar();}
 function parTile(p,prev,m){
-  const x=p.m[m.k];if(!x)return '';
+  const x=p.m[m.k];
+  if(!x)return `<div class="pt-mt nop"><div class="l">${esc(m.l)}</div><div class="v" style="color:var(--mu)">—</div><div class="d">Sin dato en este informe</div></div>`;
   let dl='';const y=prev&&prev.m[m.k];
   if(y&&y.v){const r=Math.round((x.v-y.v)/y.v*100);dl=`<div class="d">${r>0?'▲ +':r<0?'▼ ':'■ '}${r}% vs ${esc(prev.jornada)}</div>`;}
-  return `<div class="pt-mt ${x.st}"><div class="l">${esc(m.l)}</div>
-    <div class="v">${parFmt(x.v,m.d)}${m.u?' <small>'+esc(m.u)+'</small>':''}</div>
-    <div class="pt-bar"><i style="width:${Math.min(100,x.p/125*100).toFixed(1)}%"></i><u></u></div>
-    <div class="p">${x.p}% POC</div>${dl}</div>`;
+  const poc=x.p!=null?`<div class="pt-bar"><i style="width:${Math.min(100,x.p/125*100).toFixed(1)}%"></i><u></u></div><div class="p">${x.p}% POC</div>`:'';
+  return `<div class="pt-mt ${x.st||'nop'}"><div class="l">${esc(m.l)}</div>
+    <div class="v">${parFmt(x.v,m.d)}${m.u?' <small>'+esc(m.u)+'</small>':''}</div>${poc}${dl}</div>`;
 }
 function parChart(list,k){
   const m=parDef(k);
@@ -654,7 +654,7 @@ function parTable(list){
   const cols=['dt','hsr','sprint','vmax','acc','dec'];
   const nom={dt:'DIST.',hsr:'HSR',sprint:'SPRINT',vmax:'V. MÁX',acc:'ACEL.',dec:'DECEL.'};
   const head=cols.map(k=>`<th>${nom[k]}</th>`).join('');
-  const rows=list.slice().reverse().map((p,i)=>`<tr${i===0?' class="cur"':''}><td>${esc(p.jornada)}</td><td class="rv">${esc(p.partido)}</td><td>${p.min}′</td>${cols.map(k=>`<td>${p.m[k]?parFmt(p.m[k].v,parDef(k).d):'—'}</td>`).join('')}</tr>`).join('');
+  const rows=list.slice().reverse().map((p,i)=>`<tr${i===0?' class="cur"':''}><td>${esc(p.jornada)}</td><td class="rv">${esc(p.partido||'—')}</td><td>${p.min}′</td>${cols.map(k=>`<td>${p.m[k]?parFmt(p.m[k].v,parDef(k).d):'—'}</td>`).join('')}</tr>`).join('');
   return `<div class="pt-tw"><table class="pt-t"><thead><tr><th>JOR.</th><th>PARTIDO</th><th>MIN</th>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function rPar(){
@@ -673,10 +673,11 @@ function rPar(){
   el.innerHTML=`
     <div class="pt-hd">
       <div><div class="st" style="margin-bottom:2px">Último partido</div>
-        <div class="pt-meta" style="margin:0">${esc(p.jornada)} · ${esc(p.partido)} · ${esc(p.fecha)} · % respecto al POC</div></div>
+        <div class="pt-meta" style="margin:0">${[p.jornada,p.partido,p.fecha].filter(Boolean).map(esc).join(' · ')} · % respecto al POC</div></div>
       <div class="pt-load"><b>${p.min}′</b><span>${esc(p.carga||'')}</span></div>
     </div>
     <div class="g4 pt-g4">${PAR_METS.map(m=>parTile(p,prev,m)).join('')}</div>
+    ${PAR_METS.some(m=>!p.m[m.k])||!p.m.hmld?'<div class="pt-note" style="margin:-6px 0 14px">Este partido solo trae los datos del Informe general. Las métricas sin dato se completarán al cargar su Match Day Report.</div>':''}
     <div class="g2">
       <div class="card"><div class="ct">HMLD · distancia de alta demanda metabólica</div>
         <div class="pt-hm"><div class="mv" style="margin:0">${hm?parFmt(hm.v):'—'} <span style="font-family:var(--fm);font-size:12px;font-weight:400;color:var(--mu)">m</span></div>${hm?`<span class="pt-pill">${hm.p}%</span>`:''}</div></div>

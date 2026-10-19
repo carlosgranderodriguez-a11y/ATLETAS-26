@@ -155,7 +155,7 @@ function render(){
           <div><div class="name">${esc(a.nombre)}</div><div class="sub">${esc(a.sub||d.label)}</div></div>
           <span class="dot" style="background:${s};--s:${s}"></span>
         </div>
-        <div class="url-preview">${ultimoPartido(a)?'→ '+esc(ultimoPartido(a).jornada)+' · '+esc(ultimoPartido(a).partido):(has?'↗ '+esc(shortUrl(a.url)):'→ documento del atleta')}</div>
+        <div class="url-preview">${ultimoPartido(a)?'→ '+esc(ultimoPartido(a).jornada)+' · '+esc(ultimoPartido(a).partido||ultimoPartido(a).fecha):(has?'↗ '+esc(shortUrl(a.url)):'→ documento del atleta')}</div>
         <div class="card-foot">
           <span class="go linked">Abrir ${has?'enlace ↗':'documento ↗'}</span>
           <button class="editlink" data-editurl="${a.id}" title="Enlace externo (opcional)">✎</button>

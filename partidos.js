@@ -5,6 +5,7 @@
    Para añadir un partido nuevo: copia el último bloque de "partidos"
    del atleta, pégalo DESPUÉS (el más reciente va al final) y cambia
    los valores. Cada métrica: {v: valor, p: % respecto al POC, st: ok|warn|bad}
+   (p y st son opcionales: si el informe no los trae, se omiten; las métricas que falten se pueden omitir)
    Claves: dt distancia total · hsr alta intensidad · v28 distancia >28 km/h
            acc aceleraciones · sprint · esf28 esfuerzos >28
            dec deceleraciones · vmax velocidad máx. (km/h) · hmld HMLD
@@ -25,6 +26,13 @@ window.PARTIDOS={
           dec:{v:59,p:109,st:'ok'},
           vmax:{v:31.4,p:95,st:'warn'},
           hmld:{v:3288,p:96,st:'ok'}
+        }},
+      // J08: solo Informe general (sin % POC ni sprint/acel./decel./HMLD; rival no indicado en el PDF)
+      {id:'j08',jornada:'J08',partido:'',fecha:'domingo 18 oct 2026',min:99,carga:'',
+        m:{
+          dt:{v:10621},
+          hsr:{v:661},
+          vmax:{v:31.2}
         }}
     ]
   }
