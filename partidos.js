@@ -28,7 +28,7 @@ window.PARTIDOS={
           hmld:{v:3288,p:96,st:'ok'}
         }},
       // J08: Informe general + sprint, esfuerzos, acel. y decel. dados por Carlos. Faltan v28, HMLD y los % POC: completar con el Match Day Report
-      {id:'j08',jornada:'J08',partido:'Antequera',fecha:'domingo 18 oct 2026',min:99,carga:'',
+      {id:'j08',jornada:'J08',partido:'RM Castilla vs Antequera',fecha:'domingo 18 oct 2026',min:99,carga:'',
         m:{
           dt:{v:10621},
           hsr:{v:661},
