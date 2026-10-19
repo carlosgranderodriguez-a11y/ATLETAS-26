@@ -27,11 +27,15 @@ window.PARTIDOS={
           vmax:{v:31.4,p:95,st:'warn'},
           hmld:{v:3288,p:96,st:'ok'}
         }},
-      // J08: solo Informe general (sin % POC ni sprint/acel./decel./HMLD): completar con el Match Day Report
+      // J08: Informe general + sprint, esfuerzos, acel. y decel. dados por Carlos. Faltan v28, HMLD y los % POC: completar con el Match Day Report
       {id:'j08',jornada:'J08',partido:'Antequera',fecha:'domingo 18 oct 2026',min:99,carga:'',
         m:{
           dt:{v:10621},
           hsr:{v:661},
+          sprint:{v:273},
+          esf28:{v:19},
+          acc:{v:30},
+          dec:{v:54},
           vmax:{v:31.2}
         }}
     ]
