@@ -9,11 +9,18 @@
    Claves: dt distancia total · hsr alta intensidad · v28 distancia >28 km/h
            acc aceleraciones · sprint · esf28 esfuerzos >28
            dec deceleraciones · vmax velocidad máx. (km/h) · hmld HMLD
+
+   CALENDARIO: cada partido aparece solo en su día (fecha) con el rival.
+   Sesiones de fuerza: añade en "fuerza" {fecha:'lunes 19 oct 2026', sesion:'Fuerza tren inferior', nota:'opcional'}
+   (misma forma de fecha que los partidos: 'día-semana d mes aaaa')
    ============================================================ */
 window.PARTIDOS={
   'diego-aguado':{
     // Minutos de partidos anteriores al histórico (solo se conocen los minutos)
     minutosPrevios:[65,102,99,82],
+    fuerza:[
+      // {fecha:'lunes 12 oct 2026', sesion:'Fuerza', nota:''}
+    ],
     partidos:[
       {id:'j07',jornada:'J07',partido:'UD Ibiza – RM Castilla',fecha:'viernes 9 oct 2026',min:96,carga:'Alta',
         m:{

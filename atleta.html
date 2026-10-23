@@ -784,6 +784,28 @@ const PH={'A':'phA','A+':'phAp','A++':'phApp','I':'phI','T':'phT','R':'phR','C':
 const PC={'A':'#50f090','A+':'#50f090','A++':'#50f090','I':'#50c8f0','T':'#50c8f0','R':'#f0a050','C':'#f08080','RC':'#f06060','D':'#8888aa','':'var(--mu)'};
 const DIASW=['L','M','X','J','V','S','D'];
 
+// ===== Partidos y fuerza en el calendario (datos de partidos.js) =====
+const _MESES_ES={ene:'Ene',feb:'Feb',mar:'Mar',abr:'Abr',may:'May',jun:'Jun',jul:'Jul',ago:'Ago',sep:'Sep',sept:'Sep',oct:'Oct',nov:'Nov',dic:'Dic'};
+function fechaCal(txt){ // 'viernes 9 oct 2026' -> {mes:'Oct 2026', d:9}
+  const m=String(txt||'').toLowerCase().match(/(\d{1,2})\s+([a-záéíóú]+)\.?\s+(\d{4})/);
+  if(!m)return null;const mes=_MESES_ES[m[2]];if(!mes)return null;
+  return {mes:mes+' '+m[3],d:+m[1]};
+}
+function rivalDe(p){
+  if(p.rival)return p.rival;
+  const partes=String(p.partido||'').split(/\s+(?:vs\.?|v|–|—|-)\s+/i).map(x=>x.trim()).filter(Boolean);
+  if(partes.length<2)return p.partido||'';
+  const r=partes.find(x=>!/castilla/i.test(x));return r||partes[1];
+}
+function calPartidos(mes,d){
+  const pd=parData();if(!pd||!pd.partidos)return [];
+  return pd.partidos.filter(p=>{const f=fechaCal(p.fecha);return f&&f.mes===mes&&f.d===d;});
+}
+function calFuerza(mes,d){
+  const pd=parData();if(!pd||!pd.fuerza)return [];
+  return pd.fuerza.filter(f=>{const x=fechaCal(f.fecha);return x&&x.mes===mes&&x.d===d;});
+}
+
 function bCal(){
   if(!S.days)S.days={};
   const _now=new Date();const _MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -817,6 +839,8 @@ function bCal(){
           ${dLoads.length?dLoads.map(x=>`<div style="font-family:var(--fm);font-size:9px;color:${esc(x.t.color)}">${esc(tipoLabel(x.t))} ${esc(x.v)}</div>`).join(''):''}
           ${dd.nota?`<div style="font-size:9px;margin-top:3px;color:var(--bl);line-height:1.3;word-break:break-word">${esc(dd.nota)}</div>`:''}
           ${comps.length?comps.map(c=>`<div class="dcmp" style="color:${esc(compColor(c))}">• ${esc(c.name)}</div>`).join(''):''}
+          ${calPartidos(m.mes,d).map(p=>`<div class="dcmp" style="color:#9BCDB4;font-weight:600" title="${esc(p.partido)}">⚽ ${esc(p.jornada||'')} vs ${esc(rivalDe(p))}${p.min?` · ${esc(p.min)}'`:''}</div>`).join('')}
+          ${calFuerza(m.mes,d).map(f=>`<div class="dcmp" style="color:#50c8f0">🏋️ ${esc(f.sesion||'Fuerza')}${f.nota?`<span style="color:var(--mu);font-weight:400"> · ${esc(f.nota)}</span>`:''}</div>`).join('')}
         </div>`;
       }
       const used=off+(wl.e-wl.s+1);
@@ -861,7 +885,8 @@ function openDay(dkey,mes,d){
   dayEdit=dkey;
   const dd=S.days[dkey]||{};const wk=findWeekForDay(mes,d);
   document.getElementById('wk-title').textContent=d+' · '+mes;
-  document.getElementById('wk-sub').textContent='Semana '+(wk?wk.num:'—');
+  const _ex=calPartidos(mes,d).map(p=>'⚽ '+p.partido).concat(calFuerza(mes,d).map(f=>'🏋️ '+(f.sesion||'Fuerza')));
+  document.getElementById('wk-sub').textContent='Semana '+(wk?wk.num:'—')+(_ex.length?' · '+_ex.join(' · '):'');
   document.getElementById('wk-fase').value=dd.fase||(wk?wk.fase:'')||'';
   document.getElementById('wk-cargas').innerHTML=S.cargaTipos.map((t,i)=>{
     const v=getLoad(dd,t,i);
