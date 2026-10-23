@@ -92,6 +92,28 @@ tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)
 .chp-x{cursor:pointer;opacity:.5;margin-left:2px;font-size:10px}.chp-x:hover{opacity:1;color:#f08080}
 .qadd{font-family:var(--fm);font-size:9px;padding:3px 7px;border-radius:4px;background:var(--bg3);border:1px solid var(--bd);color:var(--mu);cursor:pointer}
 .qadd:hover{border-color:rgba(200,240,80,.5);color:var(--tx)}
+/* VISTA VISUAL · semanas apiladas */
+.vw{display:grid;grid-template-columns:78px minmax(0,1fr) 170px;gap:8px;align-items:center;padding:6px 8px;margin-bottom:4px;border:1px solid var(--bd);border-radius:8px;background:rgba(255,255,255,.015)}
+.vw-h{font-family:var(--fm);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap}.vw-r{font-size:9px;color:var(--mu)}
+.vw-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.vd{min-height:62px;border-radius:6px;padding:4px 5px;cursor:pointer;display:flex;flex-direction:column;gap:2px;border:1px solid transparent;transition:transform .12s,border-color .12s;overflow:hidden}
+.vd:hover{border-color:rgba(255,255,255,.3);transform:translateY(-1px)}
+.vd-e{background:transparent;cursor:default;pointer-events:none}
+.vd-m{border-color:rgba(155,205,180,.7)}
+.vd-t{outline:2px solid var(--ac);outline-offset:-2px}
+.vd-n{font-family:var(--fm);font-size:11px;color:var(--mu)}
+.vd-i{font-size:14px;line-height:1.1;letter-spacing:1px}
+.vd-l{font-family:var(--fm);font-size:8px;color:#9BCDB4;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vd-u{font-family:var(--fm);font-size:9px;font-weight:700;color:var(--ac);margin-top:auto}
+.vw-bar{cursor:pointer}
+.vb{height:10px;border-radius:5px;background:rgba(255,255,255,.06);overflow:hidden}
+.vb-f{height:100%;border-radius:5px;background:linear-gradient(90deg,rgba(200,240,80,.55),#c8f050)}
+.vb-t{display:flex;justify-content:space-between;gap:6px;font-family:var(--fm);font-size:11px;margin-top:4px;color:var(--ac)}
+.vdet{grid-column:1/-1;border-top:1px dashed var(--bd);padding-top:6px}
+.vdet-r{display:grid;grid-template-columns:62px minmax(0,1fr);gap:8px;padding:5px 0;border-bottom:1px solid var(--bd);font-size:12px}
+.vdet-d{font-family:var(--fm);font-size:11px;color:var(--ac);cursor:pointer}
+.vdet-c{display:flex;flex-direction:column;gap:3px}
+@media(max-width:760px){.vw{grid-template-columns:70px minmax(0,1fr)}.vw-bar{grid-column:1/-1}.vd{min-height:54px}.vd-l{display:none}}
 /* TIMELINE */
 .tlw{overflow-x:auto;padding-bottom:6px}
 .tlr{display:flex;height:26px;margin-bottom:2px;align-items:stretch}
@@ -286,7 +308,7 @@ body.athlete .coach-only{display:none!important}
 <div id="pnl-cal" class="pnl">
   <div class="st">Calendario de carga</div>
   <div class="ss">Calendario por días · pincha un día para fijar fase, carga (🏋️ RPE), contenidos (chips) y nota</div>
-  <div style="display:flex;align-items:center;gap:10px;margin:-4px 0 10px"><span id="gc-status" style="font-family:var(--fm);font-size:10px;color:var(--mu)">GymCoach Pro…</span><button onclick="gcLoad()" style="font-family:var(--fm);font-size:10px;padding:3px 9px;border-radius:4px;background:var(--bg3);border:1px solid var(--bd);color:var(--mu);cursor:pointer">↻ Sincronizar</button></div>
+  <div style="display:flex;align-items:center;gap:10px;margin:-4px 0 10px"><span id="gc-status" style="font-family:var(--fm);font-size:10px;color:var(--mu)">GymCoach Pro…</span><button onclick="gcLoad()" style="font-family:var(--fm);font-size:10px;padding:3px 9px;border-radius:4px;background:var(--bg3);border:1px solid var(--bd);color:var(--mu);cursor:pointer">↻ Sincronizar</button><span id="cal-mode" style="display:inline-flex;gap:4px;margin-left:auto"></span></div>
   <div class="cleg">
     <div class="cli"><div class="cld" style="background:rgba(80,240,144,.3)"></div>Acumulación</div>
     <div class="cli"><div class="cld" style="background:rgba(80,200,240,.3)"></div>Transformación</div>
@@ -998,8 +1020,102 @@ function calFuerza(mes,d){
   return pd.fuerza.filter(f=>{const x=fechaCal(f.fecha);return x&&x.mes===mes&&x.d===d;});
 }
 
+// ===== VISTA VISUAL: semanas apiladas con carga =====
+const DOWN=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+let VEXP={};
+function calMode(){return (S.cfg&&S.cfg.calView)||'visual';}
+function setCalMode(m){S.cfg.calView=m;save();bCal();}
+function vModeBtns(){
+  const b=(m,l)=>`<button onclick="setCalMode('${m}')" style="font-family:var(--fm);font-size:10px;padding:3px 10px;border-radius:4px;border:1px solid ${calMode()===m?'rgba(200,240,80,.5)':'var(--bd)'};background:${calMode()===m?'rgba(200,240,80,.12)':'var(--bg3)'};color:${calMode()===m?'var(--ac)':'var(--mu)'};cursor:pointer">${l}</button>`;
+  const e=document.getElementById('cal-mode');if(e)e.innerHTML=b('visual','Visual')+b('clasico','Clásico');
+}
+function vToggle(k){
+  VEXP[k]=!VEXP[k];
+  const e=document.getElementById('vdet-'+k);if(e)e.style.display=VEXP[k]?'block':'none';
+  const a=document.getElementById('varr-'+k);if(a)a.textContent=VEXP[k]?'▾':'▸';
+}
+function vCompsDia(m,wl,d){
+  const mid=wl.s+Math.floor((wl.e-wl.s)/2);
+  return (S.comps||[]).filter(c=>{
+    if(c.dia){const ini=+c.dia,fin=+(c.diaFin||c.dia);return c.mes===m.mes&&d>=Math.min(ini,fin)&&d<=Math.max(ini,fin);}
+    return (c.sem===wl.n)&&d===mid&&(!c.mes||c.mes===m.mes);
+  });
+}
+function vIconos(di){
+  const ic=[];
+  if(di.part.length)ic.push('⚽');
+  if(di.comps.length)ic.push('🏆');
+  const haySesFza=di.fz.length||di.gc.length;
+  if(haySesFza)ic.push(di.gc.length&&di.gc.every(s=>gcDone(s.id))&&!di.fz.length?'✅':'🏋️');
+  (di.dd.cont||[]).forEach(x=>{const e=CONT_EMO[x.n]||(x.t==='fis'?'💪':'🎯');if(!(e==='🏋️'&&haySesFza)&&!ic.includes(e))ic.push(e);});
+  return ic.slice(0,3);
+}
+function vDetalleDia(m,di){
+  const dowIdx=(new Date(+m.mes.split(' ')[1],MESES3.indexOf(m.mes.split(' ')[0]),di.d).getDay()+6)%7;
+  const L=[];
+  di.part.forEach(p=>{const dt=p.m&&p.m.dt?' · '+parFmt(p.m.dt.v)+' m':'';L.push(`<div style="color:#9BCDB4;font-weight:600">⚽ ${esc(p.jornada||'')} · ${esc(p.partido)} · ${esc(p.min)}'${dt}</div>`);});
+  di.comps.forEach(c=>L.push(`<div style="color:${esc(compColor(c))}">🏆 ${esc(c.name)}</div>`));
+  di.fz.forEach(f=>{L.push(`<div style="color:hsl(${contHue('Fuerza')},72%,72%)">🏋️ ${esc(f.sesion||'Fuerza')}${f.nota?' · '+esc(f.nota):''}</div>`);
+    if(f.bloques&&f.bloques.length)L.push(`<div style="font-size:10px;color:var(--mu)">${f.bloques.map(b=>esc(b.n)).join(' · ')}</div>`);});
+  di.gc.forEach(s=>L.push(gcChipHTML(s)));
+  if((di.dd.cont||[]).length)L.push(lanesHTML(di.dd.cont,[]));
+  if(di.dd.nota)L.push(`<div style="font-size:10px;color:var(--bl)">${esc(di.dd.nota)}</div>`);
+  return `<div class="vdet-r"><div class="vdet-d" onclick="openDay('${di.dkey}','${m.mes}',${di.d})">${DOWN[dowIdx]} ${di.d}</div><div class="vdet-c">${L.join('')}</div></div>`;
+}
+function bCalVisual(){
+  if(!S.days)S.days={};
+  vModeBtns();
+  const now=new Date();const TODAY={mes:MESES3[now.getMonth()]+' '+now.getFullYear(),d:now.getDate()};
+  let maxDay=600,maxWk=1500;
+  const data=CAL.map(m=>({m:m,wks:m.wks.map(wl=>{
+    const wd=S.weeks.find(w=>w.num===wl.n&&w.mes===m.mes)||S.weeks.find(w=>w.num===wl.n)||{fase:''};
+    const days=[];let ua=0;
+    for(let d=wl.s;d<=wl.e;d++){
+      const dkey=m.mes.replace(' ','-')+'-'+d,dd=S.days[dkey]||{},u=cargaCont(dd.cont);
+      days.push({d:d,dkey:dkey,dd:dd,u:u,part:calPartidos(m.mes,d),fz:calFuerza(m.mes,d),gc:gcSesDia(isoDeDia(m.mes,d)),comps:vCompsDia(m,wl,d)});
+      ua+=u;if(u>maxDay)maxDay=u;
+    }
+    if(ua>maxWk)maxWk=ua;
+    return {wl:wl,wd:wd,days:days,ua:ua};
+  })}));
+  const todayWk=(function(){for(const x of data){if(x.m.mes!==TODAY.mes)continue;for(const w of x.wks){if(TODAY.d>=w.wl.s&&TODAY.d<=w.wl.e)return x.m.mes.replace(' ','-')+'-'+w.wl.n+'-'+w.wl.s;}}return null;})();
+  if(VEXP.__init===undefined){VEXP.__init=1;if(todayWk)VEXP[todayWk]=true;}
+  let h=`<div style="display:flex;flex-wrap:wrap;gap:12px;font-family:var(--fm);font-size:10px;color:var(--mu);margin:4px 0 6px"><span>⚽ partido</span><span>🏋️ fuerza</span><span>✅ GymCoach completada</span><span>🏆 competición</span><span style="display:inline-flex;align-items:center;gap:5px">carga del día <i style="display:inline-block;width:14px;height:10px;border-radius:2px;background:rgba(200,240,80,.12)"></i><i style="display:inline-block;width:14px;height:10px;border-radius:2px;background:rgba(200,240,80,.3)"></i><i style="display:inline-block;width:14px;height:10px;border-radius:2px;background:rgba(200,240,80,.5)"></i></span><span>pincha un día para editarlo · pincha la semana para ver el detalle</span></div>`;
+  data.forEach(x=>{
+    const m=x.m;
+    h+=`<div id="cm-${m.mes.replace(' ','-')}" style="margin-bottom:14px;scroll-margin-top:64px"><div style="font-family:var(--fh);font-size:16px;font-weight:700;margin:14px 0 8px">${m.mes}</div>`;
+    x.wks.forEach((w,wi)=>{
+      const k=m.mes.replace(' ','-')+'-'+w.wl.n+'-'+w.wl.s;
+      const isCont=wi>0&&x.wks[wi-1].wl.n===w.wl.n;
+      const off=(w.wl.n===x.wks[0].wl.n)?m.off-1:0;
+      let cells='';
+      for(let i=0;i<off;i++)cells+='<div class="vd vd-e"></div>';
+      w.days.forEach(di=>{
+        const isToday=(m.mes===TODAY.mes&&di.d===TODAY.d);
+        const hasSes=di.fz.length||di.gc.length;
+        let bg='rgba(255,255,255,.03)';
+        if(di.u)bg=`rgba(200,240,80,${(.08+.42*Math.min(1,di.u/maxDay)).toFixed(2)})`;
+        else if(hasSes)bg='rgba(80,200,240,.12)';
+        if(di.part.length)bg='rgba(155,205,180,.2)';
+        const ic=vIconos(di);
+        const rival=di.part.length?`<div class="vd-l">vs ${esc(rivalDe(di.part[0]))}</div>`:'';
+        cells+=`<div class="vd${di.part.length?' vd-m':''}${isToday?' vd-t':''}" ${isToday?'id="cal-today"':''} style="background:${bg}" onclick="openDay('${di.dkey}','${m.mes}',${di.d})"><div class="vd-n">${di.d}</div><div class="vd-i">${ic.join('')}</div>${rival}${di.u?`<div class="vd-u">${di.u}</div>`:''}</div>`;
+      });
+      for(let i=off+w.days.length;i<7;i++)cells+='<div class="vd vd-e"></div>';
+      const pct=Math.round(100*w.ua/maxWk);
+      const fase=w.wd.fase||'';
+      const dets=w.days.filter(di=>di.u||di.part.length||di.fz.length||di.gc.length||di.comps.length||di.dd.nota||(di.dd.cont&&di.dd.cont.length)).map(di=>vDetalleDia(m,di)).join('');
+      h+=`<div class="vw"><div class="vw-h" onclick="vToggle('${k}')"><span id="varr-${k}" style="color:var(--mu)">${VEXP[k]?'▾':'▸'}</span> <b style="${isCont?'opacity:.5':''}">S${w.wl.n}</b><span class="vw-r">${w.wl.s}–${w.wl.e}</span></div><div class="vw-days">${cells}</div><div class="vw-bar" onclick="vToggle('${k}')"><div class="vb"><div class="vb-f" style="width:${pct}%"></div></div><div class="vb-t"><b>${w.ua?w.ua.toLocaleString('es-ES')+' UA':'—'}</b><span style="color:${PC[fase]||'var(--mu)'}">${fase?'fase '+esc(fase):''}</span></div></div><div class="vdet" id="vdet-${k}" style="display:${VEXP[k]?'block':'none'}">${dets||'<div style="font-size:11px;color:var(--mu);padding:6px 0">Sin actividad registrada esta semana</div>'}</div></div>`;
+    });
+    h+='</div>';
+  });
+  document.getElementById('cal-body').innerHTML=h;
+}
+
 function bCal(){
   if(!S.days)S.days={};
+  if(calMode()==='visual'){bCalVisual();return;}
+  vModeBtns();
   const _now=new Date();const _MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const TODAY={mes:_MN[_now.getMonth()]+' '+_now.getFullYear(),d:_now.getDate()};
   let h='';
