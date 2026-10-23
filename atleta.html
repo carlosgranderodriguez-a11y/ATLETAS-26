@@ -75,6 +75,23 @@ tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)
 .dph{font-family:var(--fm);font-size:10px;font-weight:500}
 .dcmp{font-size:10px;margin-top:3px;line-height:1.4;color:#c8f050}
 .dnac{font-size:9px;margin-top:1px;color:#f0a050}
+/* CONTENIDOS DEL DÍA (chips, igual que ESGRIMA-26) */
+.chps{display:flex;flex-wrap:wrap;gap:4px}
+.lane{border-radius:4px;padding:4px 4px 5px;margin-top:4px;display:flex;flex-direction:column;gap:4px;min-height:34px}
+.lane-dep{background:rgba(80,240,144,.045);border:1px dashed rgba(80,240,144,.24)}
+.lane-fis{background:rgba(80,200,240,.045);border:1px dashed rgba(80,200,240,.24)}
+.lane-h{display:flex;align-items:center;justify-content:space-between;gap:4px;font-family:var(--fm);font-size:8px;letter-spacing:.05em;opacity:.85}
+.lane-ua{font-weight:700}
+.lane-emp{font-family:var(--fm);font-size:8px;color:var(--mu);opacity:.45}
+.ses-h{font-family:var(--fm);font-size:8px;letter-spacing:.06em;color:var(--mu);margin-top:4px;padding-top:3px;border-top:1px dashed var(--bd)}
+.ses-h:first-child{margin-top:0;padding-top:0;border-top:none}
+.chp{display:flex;flex-direction:column;gap:2px;width:100%;font-family:var(--fm);font-size:10px;line-height:1.25;padding:4px 6px;border-radius:5px;overflow-wrap:break-word;border:1px solid transparent}
+.chp-gc{border-style:dashed}
+.chp-n{display:flex;align-items:center;gap:4px;font-weight:500}
+.chp-d{display:flex;align-items:center;gap:5px;opacity:.72;font-size:9px}
+.chp-x{cursor:pointer;opacity:.5;margin-left:2px;font-size:10px}.chp-x:hover{opacity:1;color:#f08080}
+.qadd{font-family:var(--fm);font-size:9px;padding:3px 7px;border-radius:4px;background:var(--bg3);border:1px solid var(--bd);color:var(--mu);cursor:pointer}
+.qadd:hover{border-color:rgba(200,240,80,.5);color:var(--tx)}
 /* TIMELINE */
 .tlw{overflow-x:auto;padding-bottom:6px}
 .tlr{display:flex;height:26px;margin-bottom:2px;align-items:stretch}
@@ -268,7 +285,8 @@ body.athlete .coach-only{display:none!important}
 <!-- CALENDARIO -->
 <div id="pnl-cal" class="pnl">
   <div class="st">Calendario de carga</div>
-  <div class="ss">Calendario por días · pincha un día para fijar fase, carga (🏋️ RPE) y nota</div>
+  <div class="ss">Calendario por días · pincha un día para fijar fase, carga (🏋️ RPE), contenidos (chips) y nota</div>
+  <div style="display:flex;align-items:center;gap:10px;margin:-4px 0 10px"><span id="gc-status" style="font-family:var(--fm);font-size:10px;color:var(--mu)">GymCoach Pro…</span><button onclick="gcLoad()" style="font-family:var(--fm);font-size:10px;padding:3px 9px;border-radius:4px;background:var(--bg3);border:1px solid var(--bd);color:var(--mu);cursor:pointer">↻ Sincronizar</button></div>
   <div class="cleg">
     <div class="cli"><div class="cld" style="background:rgba(80,240,144,.3)"></div>Acumulación</div>
     <div class="cli"><div class="cld" style="background:rgba(80,200,240,.3)"></div>Transformación</div>
@@ -281,7 +299,7 @@ body.athlete .coach-only{display:none!important}
 
 <!-- WEEK OVERLAY -->
 <div id="wk-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:flex-start;justify-content:center;padding-top:80px" onclick="if(event.target===this)closeDay()">
-  <div style="background:var(--bg2);border:1px solid rgba(200,240,80,.35);border-radius:10px;padding:20px;width:100%;max-width:460px;margin:0 16px;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+  <div style="background:var(--bg2);border:1px solid rgba(200,240,80,.35);border-radius:10px;padding:20px;width:100%;max-width:540px;margin:0 16px;box-shadow:0 20px 60px rgba(0,0,0,.5);max-height:calc(100vh - 110px);overflow-y:auto;-webkit-overflow-scrolling:touch">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
       <div><div style="font-family:var(--fh);font-size:17px;font-weight:700" id="wk-title">—</div>
       <div style="font-family:var(--fm);font-size:10px;color:var(--mu);margin-top:3px" id="wk-sub">—</div></div>
@@ -297,6 +315,26 @@ body.athlete .coach-only{display:none!important}
       </select>
     </div>
     <div id="wk-cargas" style="margin-bottom:10px;display:flex;flex-direction:column;gap:8px"></div>
+    <div style="margin-bottom:12px;border-top:1px solid var(--bd);padding-top:12px">
+      <label style="font-family:var(--fm);font-size:10px;color:var(--mu);letter-spacing:.08em">CONTENIDOS DEL DÍA</label>
+      <div class="coach-only" style="font-size:10px;color:var(--mu);margin:4px 0 -2px">Pulsa un contenido para editarlo · la ✕ lo borra</div>
+      <div id="dp-cont-list" style="margin:8px 0"></div>
+      <div id="wk-gc"></div>
+      <div class="coach-only" style="margin-top:10px">
+        <div style="display:flex;gap:5px;margin-bottom:6px;flex-wrap:wrap">
+          <select id="dpc-tipo" style="flex:0 0 auto;min-width:92px"></select>
+          <select id="dpc-sesion" style="flex:0 0 auto;min-width:98px" title="Sesión del día, si hay más de una"><option value="">— sesión —</option><option value="AM">☀ Mañana</option><option value="PM">🌙 Tarde</option></select>
+          <input id="dpc-nombre" placeholder="Contenido" style="flex:1;min-width:110px" onkeydown="if(event.key==='Enter'){event.preventDefault();addDPCont();}">
+          <input id="dpc-mom" type="time" style="flex:0 0 auto;min-width:104px" title="Hora (opcional)">
+          <input id="dpc-dur" type="number" min="0" step="5" placeholder="min" style="flex:0 0 58px" title="Duración en minutos">
+          <input id="dpc-int" type="number" min="1" max="10" step="0.5" placeholder="1-10" style="flex:0 0 58px" title="Intensidad estimada (1 muy suave · 10 máxima)">
+          <button id="dpc-add" onclick="addDPCont()" style="font-family:var(--fm);font-size:11px;padding:5px 13px;border-radius:5px;background:rgba(200,240,80,.12);border:1px solid rgba(200,240,80,.4);color:var(--ac);cursor:pointer">+</button>
+          <button id="dpc-cancel" onclick="cancelaEdicion()" style="display:none;font-family:var(--fm);font-size:11px;padding:5px 11px;border-radius:5px;background:var(--bg3);border:1px solid var(--bd);color:var(--mu);cursor:pointer">✕</button>
+        </div>
+        <div id="dpc-quick" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+      </div>
+      <div id="dpc-carga" style="font-family:var(--fm);font-size:10px;color:var(--mu);margin-top:8px"></div>
+    </div>
     <div class="fg" style="margin-bottom:14px"><label>COMENTARIO DEL DÍA</label><input id="wk-nota" placeholder="Sensaciones, observaciones, incidencias..."></div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button class="coach-only" onclick="clearDay()" style="font-family:var(--fm);font-size:11px;padding:6px 12px;border-radius:4px;background:rgba(240,80,80,.06);border:1px solid rgba(240,80,80,.25);color:var(--dg);cursor:pointer">Limpiar</button>
@@ -483,6 +521,7 @@ body.athlete .coach-only{display:none!important}
     <div class="adst">Conexiones y datos</div>
     <div class="card">
       <div class="fg" style="margin-bottom:10px"><label>GYMCOACH PRO — enlace de la sesión del atleta</label><input id="cfg-gc" placeholder="https://..."></div>
+      <div class="fg" style="margin-bottom:10px"><label>GYMCOACH PRO — nombre del atleta allí (para traer sus sesiones al calendario)</label><input id="cfg-gcn" placeholder="Si es distinto del nombre del perfil"></div>
       <div class="fg2" style="margin-bottom:10px">
         <div class="fg"><label>🔒 PIN DEL ATLETA (lo introduce el atleta al entrar)</label><input id="cfg-pin" placeholder="ej. 1234" maxlength="8"></div>
         <div class="fg"></div>
@@ -747,6 +786,152 @@ function estado(w){
   return{label:'OK',cls:'ac'};
 }
 
+// ===== CONTENIDOS DEL DÍA (chips, mismo sistema que ESGRIMA-26) + enlace con GymCoach Pro =====
+const GC_API='https://script.google.com/macros/s/AKfycbzqXBcIAhrrXHXs2u1_jk8137QI17VxC_IKA3z15cm4ZKwlkTYFbB96zjKpoxk07B4yUA/exec';
+const MESES3=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const DEP_LBL={futbol:'⚽ FÚTBOL',esgrima:'🤺 ESGRIMA',triatlon:'🏊 TRIATLÓN',readaptacion:'🩹 READAPT.',fitness:'🎯 DEPORTE',multideporte:'🎯 DEPORTE'};
+const QUICK_DEP={
+  futbol:['Calentamiento','Entrenamiento','Técnica','Táctica','Rondos','Vídeo','Recuperación activa'],
+  esgrima:['Calentamiento','Clase','Asaltos','Técnica','Táctica','Desplazamientos','Vídeo'],
+  triatlon:['Natación','Bici','Carrera','Técnica','Brick'],
+  _:['Calentamiento','Entrenamiento','Técnica','Táctica','Vídeo']
+};
+const QUICK_FIS=['Fuerza','Potencia','Metabólico','Prevención','Movilidad','Core','Recuperación'];
+const CONT_EMO={'Calentamiento':'🔥','Entrenamiento':'🎽','Técnica':'🎯','Táctica':'🧠','Rondos':'🔁','Vídeo':'🎬','Recuperación activa':'🌙',
+  'Clase':'🎓','Asaltos':'⚔️','Desplazamientos':'👟','Natación':'🏊','Bici':'🚴','Carrera':'🏃','Brick':'🔗',
+  'Fuerza':'🏋️','Potencia':'⚡','Metabólico':'🫁','Prevención':'🛡️','Movilidad':'🧘','Core':'🧩','Recuperación':'🌙'};
+function depTipo(){return S.perfil&&S.perfil.disc||'futbol';}
+function contLanes(){return [{t:'dep',lbl:DEP_LBL[depTipo()]||'🎯 DEPORTE',col:'#79e8a8'},{t:'fis',lbl:'💪 FÍSICA',col:'#77cdec'}];}
+function quickList(t){return t==='fis'?QUICK_FIS:(QUICK_DEP[depTipo()]||QUICK_DEP._);}
+function contHue(n){let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%360;return h;}
+function chipStyle(n){const H=contHue(n);return `background:hsla(${H},72%,55%,.16);border-color:hsla(${H},72%,60%,.5);color:hsl(${H},72%,72%)`;}
+const esHora=v=>/^\d{1,2}:\d{2}$/.test(v||'');
+function ordenHora(a,b){const ha=esHora(a.m),hb=esHora(b.m);if(ha&&hb)return a.m.localeCompare(b.m);if(ha)return -1;if(hb)return 1;return 0;}
+function cargaChip(x){return (x.dur&&x.int)?Math.round(x.dur*x.int):0;}
+function cargaCont(cont){return (cont||[]).reduce((a,x)=>a+cargaChip(x),0);}
+function chipHTML(x,idx){
+  const ua=cargaChip(x);
+  const tt=(x.m?x.m+' · ':'')+x.n+(x.dur?' · '+x.dur+' min':'')+(x.int?' · int '+x.int+'/10':'')+(ua?' · '+ua+' UA':'');
+  const cifras=[];
+  if(x.m&&!esHora(x.m))cifras.push(x.m);
+  if(x.dur||x.int)cifras.push((x.dur?x.dur+"'":'')+((x.dur&&x.int)?' × ':'')+(x.int?x.int:''));
+  if(ua)cifras.push(ua+' UA');
+  const ed=(idx!=null&&isCoach());
+  const clk=ed?` onclick="event.stopPropagation();editDPCont(${idx})" style="cursor:pointer;${chipStyle(x.n)}${dpcEdit===idx?';outline:2px solid var(--ac);outline-offset:1px':''}"`:` style="${chipStyle(x.n)}"`;
+  return `<span class="chp"${clk} title="${esc(tt)}"><span class="chp-n">${esHora(x.m)?`<span style="font-family:var(--fm);font-size:9px;opacity:.85;font-weight:600">${esc(x.m)}</span>`:''}<span>${CONT_EMO[x.n]||(x.t==='fis'?'💪':'🎯')}</span><span style="flex:1">${esc(x.n)}</span>`
+    +(ed?`<span class="chp-x" onclick="event.stopPropagation();delDPCont(${idx})">✕</span>`:'')+`</span>`
+    +(cifras.length?`<span class="chp-d">${cifras.join(' · ')}</span>`:'')+`</span>`;
+}
+// Chip de una sesión programada en GymCoach Pro (solo lectura, borde discontinuo)
+function gcChipHTML(s){
+  const n=(s.ejercicios||[]).length,done=gcDone(s.id);
+  return `<span class="chp chp-gc" style="${chipStyle('GymCoach')}" title="GymCoach Pro · ${esc(s.nombre||'Sesión')}${n?' · '+n+' ejercicios':''}${done?' · completada':''}"><span class="chp-n"><span>${done?'✅':'🏋️'}</span><span style="flex:1">${esc(s.nombre||'Sesión de fuerza')}</span></span><span class="chp-d">GymCoach${n?' · '+n+' ej.':''}</span></span>`;
+}
+function lanesHTML(cont,gcs){
+  return contLanes().map(L=>{
+    const cts=(cont||[]).filter(x=>x.t===L.t).slice().sort(ordenHora);
+    const gl=(L.t==='fis'?(gcs||[]):[]);
+    if(!cts.length&&!gl.length)return '';
+    const ua=cargaCont(cts);
+    const hay=cts.some(x=>x.ses);
+    const bloque=(ses,arr)=>arr.length?((ses?`<div class="ses-h">${ses==='AM'?'☀ MAÑANA':'🌙 TARDE'}</div>`:'')+`<div class="chps">${arr.map(x=>chipHTML(x)).join('')}</div>`):'';
+    const cuerpo=hay?['AM','PM',''].map(s=>bloque(s,cts.filter(x=>(x.ses||'')===s))).join(''):`<div class="chps">${cts.map(x=>chipHTML(x)).join('')}</div>`;
+    return `<div class="lane lane-${L.t}"><div class="lane-h" style="color:${L.col}"><span>${L.lbl}</span>${ua?`<span class="lane-ua">${ua} UA</span>`:''}</div>${cuerpo}${gl.length?`<div class="chps">${gl.map(gcChipHTML).join('')}</div>`:''}</div>`;
+  }).join('');
+}
+// --- GymCoach Pro: sesiones programadas y completadas del atleta ---
+function normN(n){return String(n||'').normalize('NFD').replace(/[̀-ͯ]/g,'').trim().replace(/\s+/g,' ').toLowerCase();}
+function gcNombre(){return (S.cfg&&S.cfg.gcNombre)||(S.perfil&&S.perfil.nombre)||'';}
+function gcMismo(a,b){ // 'Diego Aguado' casa con 'Diego Aguado Facio'
+  const ta=normN(a).split(' ').filter(Boolean),tb=normN(b).split(' ').filter(Boolean);
+  if(!ta.length||!tb.length)return false;
+  const [c,l]=ta.length<=tb.length?[ta,tb]:[tb,ta];
+  return c.length>=2?c.every(t=>l.includes(t)):(c[0]===l[0]&&l.length===1);
+}
+const GC={ses:[],reg:[],ej:{},ok:null,n:0,ts:null,loading:false,nombreExacto:''};
+function isoDeDia(mes,d){const p=mes.split(' ');const mi=MESES3.indexOf(p[0]);return p[1]+'-'+String(mi+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');}
+function gcSesDia(iso){return GC.ses.filter(s=>s.fecha===iso&&gcMismo(s.atleta,gcNombre()));}
+function gcDone(id){return GC.reg.some(r=>r.sesion_id===id&&r.completada);}
+function gcFetch(p){return fetch(GC_API+'?'+Object.keys(p).map(k=>k+'='+encodeURIComponent(p[k])).join('&')).then(r=>r.json());}
+function setGcStatus(){
+  const e=document.getElementById('gc-status');if(!e)return;
+  if(GC.loading){e.textContent='↺ GymCoach Pro…';return;}
+  if(GC.ok===false){e.textContent='⚠ GymCoach Pro sin conexión';return;}
+  if(GC.ok){e.textContent=GC.n?`✓ GymCoach Pro · ${GC.n} sesiones de ${GC.nombreExacto}`:`GymCoach Pro conectado · sin sesiones para "${gcNombre()}"`;}
+}
+function gcLoad(){
+  if(GC.loading)return;GC.loading=true;setGcStatus();
+  Promise.all([gcFetch({action:'getAllSesiones'}),gcFetch({action:'getEjercicios'})]).then(function(rr){
+    const rs=rr[0],re=rr[1];
+    if(!rs||!rs.ok)throw new Error('sin sesiones');
+    GC.ses=rs.sesiones||[];
+    if(re&&re.ok)GC.ej=re.ejercicios||{};
+    const mias=GC.ses.filter(s=>gcMismo(s.atleta,gcNombre()));
+    GC.n=mias.length;GC.nombreExacto=mias.length?mias[0].atleta.trim():gcNombre();
+    return gcFetch({action:'getHistorial',atleta:GC.nombreExacto}).then(function(rh){GC.reg=(rh&&rh.ok&&rh.registros)||[];});
+  }).then(function(){GC.ok=true;}).catch(function(){GC.ok=false;}).then(function(){GC.loading=false;setGcStatus();try{if(activeTab()==='cal')bCal();}catch(e){}});
+}
+// --- Editor de contenidos dentro del panel del día ---
+let dpCont=[],dpcEdit=null;
+function rDPCont(){
+  const box=document.getElementById('dp-cont-list');if(!box)return;
+  box.innerHTML=contLanes().map(L=>{
+    const idx=dpCont.map((x,i)=>({x,i})).filter(o=>o.x.t===L.t);
+    const ua=cargaCont(idx.map(o=>o.x));
+    return `<div class="lane lane-${L.t}" style="min-height:auto;margin-top:6px"><div class="lane-h" style="color:${L.col};font-size:9px"><span>${L.lbl}</span>${ua?`<span class="lane-ua">${ua} UA</span>`:''}</div>${idx.length?`<div class="chps">${idx.map(o=>chipHTML(o.x,o.i)).join('')}</div>`:'<div class="lane-emp">Sin contenidos</div>'}</div>`;
+  }).join('');
+  const btn=document.getElementById('dpc-add'),can=document.getElementById('dpc-cancel');
+  if(btn)btn.textContent=dpcEdit!=null?'✓ Actualizar':'+';
+  if(can)can.style.display=dpcEdit!=null?'':'none';
+  const ts=document.getElementById('dpc-tipo');
+  if(ts&&!ts.options.length){ts.innerHTML=contLanes().map(L=>`<option value="${L.t}">${L.lbl}</option>`).join('');ts.value='fis';ts.onchange=rDPCont;}
+  const cg=document.getElementById('dpc-carga');
+  if(cg){const ua=cargaCont(dpCont);cg.innerHTML=ua?`Carga del día: <span style="color:var(--ac);font-weight:700">⚡ ${ua} UA</span>`:'<span style="opacity:.6">Añade duración e intensidad (1-10) para calcular la carga (min × intensidad)</span>';}
+  const q=document.getElementById('dpc-quick');
+  if(q&&ts){q.innerHTML=quickList(ts.value).map(n=>`<button class="qadd" style="${chipStyle(n)}" onclick="quickDPCont('${n}')">${CONT_EMO[n]||'+'} ${n}</button>`).join('');}
+}
+function leeFormCont(n){
+  const o={t:document.getElementById('dpc-tipo').value,n:n};
+  const m=document.getElementById('dpc-mom').value;if(m)o.m=m;
+  const dur=parseInt(document.getElementById('dpc-dur').value)||null;if(dur)o.dur=dur;
+  const it=parseFloat(document.getElementById('dpc-int').value)||null;if(it)o.int=it;
+  const ses=document.getElementById('dpc-sesion').value;if(ses)o.ses=ses;
+  return o;
+}
+function limpiaFormCont(){['dpc-nombre','dpc-dur','dpc-int','dpc-mom'].forEach(id=>document.getElementById(id).value='');}
+function addDPCont(){
+  const n=document.getElementById('dpc-nombre').value.trim();if(!n)return;
+  const nuevo=leeFormCont(n);
+  if(dpcEdit!=null&&dpCont[dpcEdit]){dpCont[dpcEdit]=nuevo;dpcEdit=null;}else dpCont.push(nuevo);
+  limpiaFormCont();rDPCont();document.getElementById('dpc-nombre').focus();
+}
+function quickDPCont(n){dpCont.push(leeFormCont(n));rDPCont();}
+function delDPCont(i){dpCont.splice(i,1);if(dpcEdit===i)cancelaEdicion();else if(dpcEdit!=null&&dpcEdit>i)dpcEdit--;rDPCont();}
+function editDPCont(i){
+  const x=dpCont[i];if(!x)return;dpcEdit=i;
+  document.getElementById('dpc-tipo').value=x.t;
+  document.getElementById('dpc-nombre').value=x.n;
+  document.getElementById('dpc-mom').value=x.m||'';
+  document.getElementById('dpc-sesion').value=x.ses||'';
+  document.getElementById('dpc-dur').value=x.dur||'';
+  document.getElementById('dpc-int').value=x.int||'';
+  rDPCont();document.getElementById('dpc-nombre').focus();
+}
+function cancelaEdicion(){dpcEdit=null;limpiaFormCont();document.getElementById('dpc-sesion').value='';rDPCont();}
+// Detalle de las sesiones de GymCoach Pro de ese día (ejercicios, series, carga)
+function gcDetalleHTML(iso){
+  const ss=gcSesDia(iso);
+  if(!ss.length)return '';
+  return ss.map(s=>{
+    const exs=(s.ejercicios||[]).map(ex=>{
+      const e=GC.ej&&GC.ej[ex.id];const nom=(e&&e.nombre)||ex.id;
+      const det=[(ex.sets&&ex.reps)?ex.sets+'×'+ex.reps:'',(ex.load&&ex.load!=='—')?ex.load:'',ex.rest||''].filter(Boolean).join(' · ');
+      return `<div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;padding:2px 0;border-bottom:1px solid var(--bd)"><span>${esc(nom)}</span><span style="font-family:var(--fm);color:var(--mu);white-space:nowrap">${esc(det)}</span></div>`;
+    }).join('');
+    return `<div style="border:1px dashed hsla(${contHue('GymCoach')},72%,60%,.5);border-radius:6px;padding:8px 10px;margin-top:6px"><div style="font-family:var(--fm);font-size:10px;letter-spacing:.06em;color:hsl(${contHue('GymCoach')},72%,72%)">${gcDone(s.id)?'✅':'🏋️'} GYMCOACH PRO · ${esc(s.nombre||'Sesión')}</div>${exs||'<div style="font-size:11px;color:var(--mu)">Sin ejercicios</div>'}</div>`;
+  }).join('');
+}
+
 // ===== CALENDARIO =====
 function buildCAL(year,startMonth){
   const MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -838,6 +1023,8 @@ function bCal(){
           <div class="dph" style="color:${PC[fase]||'var(--mu)'}">${esc(fase)}</div>
           ${dLoads.length?dLoads.map(x=>`<div style="font-family:var(--fm);font-size:9px;color:${esc(x.t.color)}">${esc(tipoLabel(x.t))} ${esc(x.v)}</div>`).join(''):''}
           ${dd.nota?`<div style="font-size:9px;margin-top:3px;color:var(--bl);line-height:1.3;word-break:break-word">${esc(dd.nota)}</div>`:''}
+          ${cargaCont(dd.cont)?`<div style="font-family:var(--fm);font-size:9px;font-weight:700;color:var(--ac);margin-top:3px">⚡ ${cargaCont(dd.cont)} UA</div>`:''}
+          ${lanesHTML(dd.cont,gcSesDia(isoDeDia(m.mes,d)))}
           ${comps.length?comps.map(c=>`<div class="dcmp" style="color:${esc(compColor(c))}">• ${esc(c.name)}</div>`).join(''):''}
           ${calPartidos(m.mes,d).map(p=>`<div class="dcmp" style="color:#9BCDB4;font-weight:600" title="${esc(p.partido)}">⚽ ${esc(p.jornada||'')} vs ${esc(rivalDe(p))}${p.min?` · ${esc(p.min)}'`:''}</div>`).join('')}
           ${calFuerza(m.mes,d).map(f=>`<div class="dcmp" style="color:#50c8f0">🏋️ ${esc(f.sesion||'Fuerza')}${f.nota?`<span style="color:var(--mu);font-weight:400"> · ${esc(f.nota)}</span>`:''}</div>`).join('')}
@@ -853,10 +1040,12 @@ function bCal(){
       const grand=Math.round(sums.reduce((a,x)=>a+((x.s!=null&&x.t.enTotal!==false)?x.s*(x.t.peso==null?1:+x.t.peso):0),0)*10)/10;
       const shown=sums.filter(x=>x.s!=null);
       const anySum=shown.length>0;
+      let uaSem=0;for(let d=wl.s;d<=wl.e;d++){const dd3=S.days[m.mes.replace(' ','-')+'-'+d];if(dd3)uaSem+=cargaCont(dd3.cont);}
       h+=`<div class="cd" style="min-width:90px;max-width:90px;background:rgba(255,255,255,.03);border-left:2px solid var(--bd);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 4px">
         <div style="font-family:var(--fm);font-size:8px;color:var(--mu);letter-spacing:.05em">CARGA</div>
-        ${anySum?shown.map(x=>`<div style="font-family:var(--fm);font-size:10px;font-weight:600;color:${esc(x.t.color)}">${esc(tipoLabel(x.t))} ${x.s}</div>`).join(''):'<div style="font-size:13px;font-weight:700;color:var(--mu)">—</div>'}
+        ${(anySum||uaSem)?shown.map(x=>`<div style="font-family:var(--fm);font-size:10px;font-weight:600;color:${esc(x.t.color)}">${esc(tipoLabel(x.t))} ${x.s}</div>`).join(''):'<div style="font-size:13px;font-weight:700;color:var(--mu)">—</div>'}
         ${anySum&&shown.length>1?`<div style="font-family:var(--fm);font-size:11px;font-weight:700;color:var(--ac);border-top:1px solid var(--bd);margin-top:2px;padding-top:2px">Σ ${grand}</div>`:''}
+        ${uaSem?`<div style="font-family:var(--fm);font-size:10px;font-weight:700;color:var(--ac);border-top:1px solid var(--bd);margin-top:2px;padding-top:2px">⚡ ${uaSem} UA</div>`:''}
       </div></div>`;
     });
     h+=`</div>`;
@@ -893,6 +1082,11 @@ function openDay(dkey,mes,d){
     return `<div class="fg"><label style="color:${esc(t.color)}">${t.icono?esc(t.icono)+' ':''}${esc(t.nombre)} · carga (RPE)</label><input class="wk-carga-in" data-tipo="${esc(t.id)}" type="number" step="0.1" min="1" max="10" value="${v!=null?esc(v):''}" placeholder="1–10"></div>`;
   }).join('');
   document.getElementById('wk-nota').value=dd.nota||'';
+  dpCont=JSON.parse(JSON.stringify(dd.cont||[]));dpcEdit=null;
+  const _ts=document.getElementById('dpc-tipo');if(_ts)_ts.innerHTML='';
+  limpiaFormCont();document.getElementById('dpc-sesion').value='';
+  rDPCont();
+  document.getElementById('wk-gc').innerHTML=gcDetalleHTML(isoDeDia(mes,d));
   document.getElementById('wk-overlay').style.display='flex';
 }
 function closeDay(){document.getElementById('wk-overlay').style.display='none';dayEdit=null;}
@@ -908,6 +1102,7 @@ function saveDay(){
   if(isCoach()){const fase=document.getElementById('wk-fase').value||'';if(fase)o.fase=fase;}
   else if(prev.fase){o.fase=prev.fase;}
   if(Object.keys(cargas).length)o.cargas=cargas;
+  if(isCoach()){if(dpCont.length)o.cont=dpCont;}else if(prev.cont&&prev.cont.length){o.cont=prev.cont;}
   if(nota)o.nota=nota;
   if(Object.keys(o).length)S.days[dayEdit]=o;else delete S.days[dayEdit];
   save();closeDay();bCal();toast('✓ Guardado');
@@ -1023,6 +1218,7 @@ function rAdm(){
   document.getElementById('p-cat').value=p.cat||'';
   document.getElementById('p-extra').value=p.extra||'';
   document.getElementById('cfg-gc').value=S.gymcoach.url||'';
+  document.getElementById('cfg-gcn').value=S.cfg.gcNombre||'';
   document.getElementById('cfg-script').value=S.cfg.script||SCRIPT_URL||'';
   document.getElementById('cfg-csv').value=S.cfg.csv||'';
   document.getElementById('cfg-pin').value=S.cfg.pin||'';
@@ -1125,10 +1321,11 @@ function saveProfile(){
 }
 function saveCfg(){
   S.gymcoach.url=document.getElementById('cfg-gc').value.trim();
+  S.cfg.gcNombre=document.getElementById('cfg-gcn').value.trim();
   S.cfg.script=document.getElementById('cfg-script').value.trim();
   S.cfg.csv=document.getElementById('cfg-csv').value.trim();
   S.cfg.pin=document.getElementById('cfg-pin').value.trim();
-  save();toast('✓ Conexiones guardadas');
+  save();toast('✓ Conexiones guardadas');gcLoad();
 }
 let editingCompId=null;
 const COMP_COLORS={alta:'#f05050',media:'#f0a050',baja:'#6b7280'};
@@ -1241,6 +1438,7 @@ if(gasUrl()){
     }else{
       setSync('Sin datos en el Sheet aún (se guardará al editar)');
     }
+    gcLoad();
     evalGate();
   });
 }else{
