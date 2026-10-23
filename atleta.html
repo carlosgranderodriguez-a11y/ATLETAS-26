@@ -919,6 +919,13 @@ function editDPCont(i){
 }
 function cancelaEdicion(){dpcEdit=null;limpiaFormCont();document.getElementById('dpc-sesion').value='';rDPCont();}
 // Detalle de las sesiones de GymCoach Pro de ese día (ejercicios, series, carga)
+function fuerzaDetalleHTML(mes,d){
+  return calFuerza(mes,d).filter(f=>f.bloques&&f.bloques.length).map(f=>{
+    const bl=f.bloques.map(b=>`<div style="margin-top:6px"><div style="font-family:var(--fm);font-size:10px;letter-spacing:.05em;color:hsl(${contHue('Fuerza')},72%,72%)">${esc(b.n.toUpperCase())}${b.series?' · '+b.series+' series':''}</div>`
+      +b.ej.map(e=>`<div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;padding:2px 0;border-bottom:1px solid var(--bd)"><span>${esc(e.n)}</span><span style="font-family:var(--fm);color:var(--mu);white-space:nowrap">${esc(e.r||'')}</span></div>`).join('')+`</div>`).join('');
+    return `<div style="border:1px solid hsla(${contHue('Fuerza')},72%,60%,.45);border-radius:6px;padding:8px 10px;margin-top:6px"><div style="font-family:var(--fm);font-size:10px;letter-spacing:.06em;color:hsl(${contHue('Fuerza')},72%,72%)">🏋️ ${esc((f.sesion||'Fuerza').toUpperCase())}${f.fatigaPre||f.fatigaPost?` · FATIGA ${esc(f.fatigaPre||'—')} → ${esc(f.fatigaPost||'—')}`:''}</div>${bl}</div>`;
+  }).join('');
+}
 function gcDetalleHTML(iso){
   const ss=gcSesDia(iso);
   if(!ss.length)return '';
@@ -1086,7 +1093,7 @@ function openDay(dkey,mes,d){
   const _ts=document.getElementById('dpc-tipo');if(_ts)_ts.innerHTML='';
   limpiaFormCont();document.getElementById('dpc-sesion').value='';
   rDPCont();
-  document.getElementById('wk-gc').innerHTML=gcDetalleHTML(isoDeDia(mes,d));
+  document.getElementById('wk-gc').innerHTML=fuerzaDetalleHTML(mes,d)+gcDetalleHTML(isoDeDia(mes,d));
   document.getElementById('wk-overlay').style.display='flex';
 }
 function closeDay(){document.getElementById('wk-overlay').style.display='none';dayEdit=null;}
