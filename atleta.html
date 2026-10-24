@@ -56,9 +56,9 @@ tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)
 /* CALENDAR */
 .chr{display:grid;grid-template-columns:50px repeat(7,minmax(0,1fr)) 90px;gap:3px;margin-bottom:4px}
 .cdh{font-family:var(--fm);font-size:10px;color:var(--mu);text-align:center;padding:3px 0;letter-spacing:.06em}
-.wr{display:grid;grid-template-columns:50px repeat(7,minmax(0,1fr)) 90px;gap:3px;margin-bottom:3px;align-items:start}
+.wr{display:grid;grid-template-columns:50px repeat(7,minmax(0,1fr)) 90px;gap:3px;margin-bottom:3px;align-items:stretch}
 .wl{font-family:var(--fm);font-size:9px;color:var(--mu);display:flex;align-items:center;justify-content:center}
-.cd{border-radius:4px;padding:8px 6px;min-height:180px;height:auto;border:1px solid transparent;transition:opacity .15s;overflow:visible;word-break:break-word}.cd:hover{opacity:.85}
+.cd{border-radius:5px;padding:9px 8px;min-height:250px;display:flex;flex-direction:column;height:auto;border:1px solid transparent;transition:opacity .15s;overflow:visible;word-break:break-word}.cd:hover{opacity:.85}
 .cd.emp{background:rgba(255,255,255,.02)}
 .cd.phA{background:rgba(80,240,144,.07);border-color:rgba(80,240,144,.14)}
 .cd.phAp{background:rgba(80,240,144,.11);border-color:rgba(80,240,144,.22)}
@@ -818,17 +818,40 @@ const QUICK_DEP={
   triatlon:['Natación','Bici','Carrera','Técnica','Brick'],
   _:['Calentamiento','Entrenamiento','Técnica','Táctica','Vídeo']
 };
-const QUICK_FIS=['Fuerza','Potencia','Metabólico','Prevención','Movilidad','Core','Recuperación'];
+const QUICK_FIS=['Movilidad','Activación','Pliometría','Potencia','Fuerza','Fuerza complementaria','Velocidad','Core','Prevención','Metabólico','Recuperación'];
 const CONT_EMO={'Calentamiento':'🔥','Entrenamiento':'🎽','Técnica':'🎯','Táctica':'🧠','Rondos':'🔁','Vídeo':'🎬','Recuperación activa':'🌙',
   'Clase':'🎓','Asaltos':'⚔️','Desplazamientos':'👟','Natación':'🏊','Bici':'🚴','Carrera':'🏃','Brick':'🔗',
   'Fuerza':'🏋️','Potencia':'⚡','Metabólico':'🫁','Prevención':'🛡️','Movilidad':'🧘','Core':'🧩','Recuperación':'🌙'};
 function depTipo(){return S.perfil&&S.perfil.disc||'futbol';}
 function contLanes(){return [{t:'dep',lbl:DEP_LBL[depTipo()]||'🎯 DEPORTE',col:'#79e8a8'},{t:'fis',lbl:'💪 FÍSICA',col:'#77cdec'}];}
 function quickList(t){return t==='fis'?QUICK_FIS:(QUICK_DEP[depTipo()]||QUICK_DEP._);}
-function contHue(n){let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%360;return h;}
-function chipStyle(n){const H=contHue(n);return `background:hsla(${H},72%,55%,.16);border-color:hsla(${H},72%,60%,.5);color:hsl(${H},72%,72%)`;}
+const CONT_HUE={'Clase':140,'Asaltos':95,'Técnica':180,'Táctica':220,'Desplazamientos':55,'Vídeo':270,'Competición':350,
+  'Fuerza':210,'Potencia':0,'Metabólico':330,'Prevención':160,'Movilidad':300,'Core':240,'Recuperación':190,
+  'Pliometría':125,'Activación':165,'Velocidad':15,'Fuerza complementaria':250,'Potencia resistida':40,'Abdominales':280,
+  'Calentamiento':35,'Entrenamiento':150,'Rondos':80,'Recuperación activa':190,'GymCoach':20,'Partido':140};
+const CONT_SAT={'Potencia':7};
+function contHue(n){if(CONT_HUE[n]!=null)return CONT_HUE[n];let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%360;return h;}
+function chipStyle(n){const H=contHue(n),S=CONT_SAT[n]!=null?CONT_SAT[n]:72,Sf=Math.max(S,4);return `background:hsla(${H},${Sf}%,55%,.16);border-color:hsla(${H},${Sf}%,60%,.5);color:hsl(${H},${Sf}%,${S<20?82:72}%)`;}
 const esHora=v=>/^\d{1,2}:\d{2}$/.test(v||'');
 function ordenHora(a,b){const ha=esHora(a.m),hb=esHora(b.m);if(ha&&hb)return a.m.localeCompare(b.m);if(ha)return -1;if(hb)return 1;return 0;}
+const UA_DIA=[{max:149,rpe:1,lbl:'Muy baja'},{max:349,rpe:2,lbl:'Baja'},{max:599,rpe:3,lbl:'Media'},{max:899,rpe:4,lbl:'Alta'},{max:Infinity,rpe:5,lbl:'Muy alta'}];
+const RPE_COL={1:'#8888aa',2:'#50c8f0',3:'#50f090',4:'#f0a050',5:'#f06060'};
+function rpeDeUA(ua){if(!ua)return null;const t=UA_DIA.find(x=>ua<=x.max);return {rpe:t.rpe,lbl:t.lbl,col:RPE_COL[t.rpe]};}
+function uaBoxHTML(ua){
+  if(!ua)return '';const r=rpeDeUA(ua);
+  return `<div style="margin-top:5px;border-top:1px solid rgba(255,255,255,.08);padding-top:4px;text-align:center"><div style="font-family:var(--fm);font-size:10px;font-weight:700;color:var(--ac)">⚡ ${ua} UA</div><div style="font-family:var(--fm);font-size:9px;color:${r.col}">RPE ${r.rpe} · ${r.lbl}</div></div>`;
+}
+function chipSimple(nombre,emo,detalle,estilo,tit){
+  return `<span class="chp" style="${chipStyle(estilo||nombre)}" title="${esc(tit||nombre)}"><span class="chp-n"><span>${emo}</span><span style="flex:1">${esc(nombre)}</span></span>${detalle?`<span class="chp-d">${esc(detalle)}</span>`:''}</span>`;
+}
+function partidoChipHTML(p){
+  const dt=p.m&&p.m.dt?parFmt(p.m.dt.v)+' m':'';
+  return chipSimple((p.jornada?p.jornada+' · ':'')+'vs '+rivalDe(p),'⚽',[p.min?p.min+"'":'',dt].filter(Boolean).join(' · '),'Partido',p.partido);
+}
+function fuerzaChipHTML(f){
+  const nb=(f.bloques||[]).length;
+  return chipSimple(f.sesion||'Fuerza','🏋️',[nb?nb+' bloques':'',f.fatigaPre||f.fatigaPost?'fatiga '+(f.fatigaPre||'—')+'→'+(f.fatigaPost||'—'):''].filter(Boolean).join(' · '),'Fuerza');
+}
 function cargaChip(x){return (x.dur&&x.int)?Math.round(x.dur*x.int):0;}
 function cargaCont(cont){return (cont||[]).reduce((a,x)=>a+cargaChip(x),0);}
 function chipHTML(x,idx){
@@ -849,16 +872,18 @@ function gcChipHTML(s){
   const n=(s.ejercicios||[]).length,done=gcDone(s.id);
   return `<span class="chp chp-gc" style="${chipStyle('GymCoach')}" title="GymCoach Pro · ${esc(s.nombre||'Sesión')}${n?' · '+n+' ejercicios':''}${done?' · completada':''}"><span class="chp-n"><span>${done?'✅':'🏋️'}</span><span style="flex:1">${esc(s.nombre||'Sesión de fuerza')}</span></span><span class="chp-d">GymCoach${n?' · '+n+' ej.':''}</span></span>`;
 }
-function lanesHTML(cont,gcs){
+function lanesHTML(cont,gcs,ex){
+  ex=ex||{};
   return contLanes().map(L=>{
     const cts=(cont||[]).filter(x=>x.t===L.t).slice().sort(ordenHora);
     const gl=(L.t==='fis'?(gcs||[]):[]);
-    if(!cts.length&&!gl.length)return '';
+    const extra=(ex[L.t]||[]).join('');
     const ua=cargaCont(cts);
     const hay=cts.some(x=>x.ses);
     const bloque=(ses,arr)=>arr.length?((ses?`<div class="ses-h">${ses==='AM'?'☀ MAÑANA':'🌙 TARDE'}</div>`:'')+`<div class="chps">${arr.map(x=>chipHTML(x)).join('')}</div>`):'';
-    const cuerpo=hay?['AM','PM',''].map(s=>bloque(s,cts.filter(x=>(x.ses||'')===s))).join(''):`<div class="chps">${cts.map(x=>chipHTML(x)).join('')}</div>`;
-    return `<div class="lane lane-${L.t}"><div class="lane-h" style="color:${L.col}"><span>${L.lbl}</span>${ua?`<span class="lane-ua">${ua} UA</span>`:''}</div>${cuerpo}${gl.length?`<div class="chps">${gl.map(gcChipHTML).join('')}</div>`:''}</div>`;
+    const vacio=!cts.length&&!gl.length&&!extra;
+    const cuerpo=vacio?'<div class="lane-emp">—</div>':((extra?`<div class="chps">${extra}</div>`:'')+(hay?['AM','PM',''].map(s=>bloque(s,cts.filter(x=>(x.ses||'')===s))).join(''):(cts.length?`<div class="chps">${cts.map(x=>chipHTML(x)).join('')}</div>`:''))+(gl.length?`<div class="chps">${gl.map(gcChipHTML).join('')}</div>`:''));
+    return `<div class="lane lane-${L.t}"><div class="lane-h" style="color:${L.col}"><span>${L.lbl}</span>${ua?`<span class="lane-ua">${ua} UA</span>`:''}</div>${cuerpo}</div>`;
   }).join('');
 }
 // --- GymCoach Pro: sesiones programadas y completadas del atleta ---
@@ -1023,11 +1048,11 @@ function calFuerza(mes,d){
 // ===== VISTA VISUAL: semanas apiladas con carga =====
 const DOWN=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
 let VEXP={};
-function calMode(){return (S.cfg&&S.cfg.calView)||'visual';}
+function calMode(){return (S.cfg&&S.cfg.calView)||'clasico';}
 function setCalMode(m){S.cfg.calView=m;save();bCal();}
 function vModeBtns(){
   const b=(m,l)=>`<button onclick="setCalMode('${m}')" style="font-family:var(--fm);font-size:10px;padding:3px 10px;border-radius:4px;border:1px solid ${calMode()===m?'rgba(200,240,80,.5)':'var(--bd)'};background:${calMode()===m?'rgba(200,240,80,.12)':'var(--bg3)'};color:${calMode()===m?'var(--ac)':'var(--mu)'};cursor:pointer">${l}</button>`;
-  const e=document.getElementById('cal-mode');if(e)e.innerHTML=b('visual','Visual')+b('clasico','Clásico');
+  const e=document.getElementById('cal-mode');if(e)e.innerHTML=b('clasico','Detalle')+b('visual','Compacta');
 }
 function vToggle(k){
   VEXP[k]=!VEXP[k];
@@ -1146,11 +1171,9 @@ function bCal(){
           <div class="dph" style="color:${PC[fase]||'var(--mu)'}">${esc(fase)}</div>
           ${dLoads.length?dLoads.map(x=>`<div style="font-family:var(--fm);font-size:9px;color:${esc(x.t.color)}">${esc(tipoLabel(x.t))} ${esc(x.v)}</div>`).join(''):''}
           ${dd.nota?`<div style="font-size:9px;margin-top:3px;color:var(--bl);line-height:1.3;word-break:break-word">${esc(dd.nota)}</div>`:''}
-          ${cargaCont(dd.cont)?`<div style="font-family:var(--fm);font-size:9px;font-weight:700;color:var(--ac);margin-top:3px">⚡ ${cargaCont(dd.cont)} UA</div>`:''}
-          ${lanesHTML(dd.cont,gcSesDia(isoDeDia(m.mes,d)))}
+          ${uaBoxHTML(cargaCont(dd.cont))}
+          ${lanesHTML(dd.cont,gcSesDia(isoDeDia(m.mes,d)),{dep:calPartidos(m.mes,d).map(partidoChipHTML),fis:calFuerza(m.mes,d).map(fuerzaChipHTML)})}
           ${comps.length?comps.map(c=>`<div class="dcmp" style="color:${esc(compColor(c))}">• ${esc(c.name)}</div>`).join(''):''}
-          ${calPartidos(m.mes,d).map(p=>`<div class="dcmp" style="color:#9BCDB4;font-weight:600" title="${esc(p.partido)}">⚽ ${esc(p.jornada||'')} vs ${esc(rivalDe(p))}${p.min?` · ${esc(p.min)}'`:''}</div>`).join('')}
-          ${calFuerza(m.mes,d).map(f=>`<div class="dcmp" style="color:#50c8f0">🏋️ ${esc(f.sesion||'Fuerza')}${f.nota?`<span style="color:var(--mu);font-weight:400"> · ${esc(f.nota)}</span>`:''}</div>`).join('')}
         </div>`;
       }
       const used=off+(wl.e-wl.s+1);
